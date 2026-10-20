@@ -1,0 +1,1720 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>회색갈기 대공세 | 전술 지도 시뮬레이터</title>
+<style>
+:root{--ink:#eef4fa;--sub:#b0c2d0;--bg:#0b111c;--pane:#111d2d;--line:#31445a;--allied:#67d2ac;--enemy:#ff8488;--aqua:#81d7ed;--gold:#ebca86}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#1b354e 0%,#0b111c 56%);font:14px/1.5 system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink)}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid #b7f4ff;outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}main{max-width:1550px;margin:auto;padding:22px 22px 44px}
+header{display:flex;align-items:start;justify-content:space-between;gap:16px}header h1{font-size:30px;letter-spacing:-.035em;margin:4px 0 8px}header p{font-size:12.5px;color:var(--sub);max-width:810px;line-height:1.7;margin:0}.eyebrow{font-size:10px;letter-spacing:.19em;color:var(--aqua);font-weight:800}.alert{border:1px solid #546a79;padding:8px 12px;border-radius:8px;color:#e5d3a6;font-size:11px;white-space:nowrap}.settings{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0 14px}.settings label{font-size:12px;color:#bdcad4}.settings select{background:#132c3e;border:1px solid #415a6b;border-radius:8px;padding:7px 9px;color:white}.smallbtn{border:1px solid #526c7e;border-radius:8px;background:#1a3445;padding:7px 11px;color:#e2f2f8;font-size:11px;font-weight:700}.smallbtn:hover{background:#265064}.scenario-info{margin-left:auto;font-size:11px;color:#a9c7d7;display:flex;gap:7px;align-items:center}
+.metrics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:12px 0}.metric{background:linear-gradient(145deg,#132639,#102131);border:1px solid #2c455a;border-radius:12px;padding:12px 14px;min-width:0}.metric strong{display:block;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.metric span{font-size:11px;color:#aebdc9}.bar{height:4px;margin-top:7px;border-radius:6px;background:#3a4b55;overflow:hidden}.bar b{display:block;height:100%;background:#73dbb7;transition:width .2s}
+.layout{display:grid;grid-template-columns:minmax(0,1.85fr) minmax(340px,.9fr);gap:12px;align-items:start}.panel{background:linear-gradient(160deg,#14263a,#101b2b);border:1px solid #30485c;padding:15px;border-radius:13px;min-width:0}.panel h2{font-size:15px;margin:0 0 11px;display:flex;justify-content:space-between;gap:10px}.panel h2 small{font-size:11px;color:#a5b7c4;font-weight:400}.legend{display:flex;flex-wrap:wrap;gap:9px 18px;margin-bottom:10px;font-size:11px;color:#b7c8d5}.pin{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.pin.a{background:var(--allied)}.pin.e{background:var(--enemy)}.pin.h{background:var(--gold)}.scroll{overflow-x:auto;padding-bottom:5px}
+.field{position:relative;min-width:840px;width:100%;height:560px;border:1px solid #355268;border-radius:12px;overflow:hidden;background:radial-gradient(ellipse at center,#21364a,#111e30 70%)}.field:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(90deg,#8ab1c00b 1px,transparent 1px),linear-gradient(#8ab1c00b 1px,transparent 1px);background-size:24px 24px}.roads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}.fort-node{position:absolute;transform:translate(-50%,-50%);width:15.5%;min-width:111px;max-width:150px;min-height:99px;color:#f0f6fa;text-align:left;background:#3b2931;border:1px solid #9b6469;padding:10px;border-radius:10px;z-index:2;box-shadow:0 5px 16px #0005}.fort-node.allied{background:#1b4541;border-color:#65b79f}.fort-node.headquarters{background:#483626;border-color:#c7a576}.fort-node.home{background:#14374e;border-color:#578caf}.fort-node.selected{outline:2px solid #b8edff;outline-offset:2px}.fort-node.locked{opacity:.67}.fort-node strong{font-size:12px;display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;margin:4px 0}.fort-node .meta{font-size:9px;color:#b9cdda}.fort-node .hp-line{font-size:10px;color:#cfe0e9}.meter{height:5px;background:#11212f;border-radius:8px;margin:5px 0;overflow:hidden}.meter i{display:block;height:100%;background:#df777b}.allied .meter i,.home .meter i{background:#62dcb0}.extra{font-size:9px;color:#ebc4a4;min-height:13px}.allied .extra{color:#a3e7cc}.piece{position:absolute;transform:translate(-50%,-50%);z-index:8;display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;min-height:29px;padding:3px 5px;border-radius:8px;border:1px solid #60d2ad;background:#124b3c;color:#e0fff2;font-size:9px;font-weight:700;transition:left .45s ease,top .45s ease}.piece b{font-size:13px}.piece small{font-size:9px;opacity:.85}.piece.leader{border:2px solid #7defbf;background:#164e46}.piece.enemy{border-color:#ff898b;background:#6c2d38;color:#ffe9e8}.piece.hero{border-color:#ffe1a0;background:#71502f;color:#fff5d9}.piece.guard{border-color:#5ea9b2;background:#1b4347;color:#c8f4f7}.piece.active{box-shadow:0 0 0 2px #c0efff,0 0 16px #71d5e677}.piece.soldier{border-color:#79bbb0;background:#22494b}
+.map-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin:9px 0 0;font-size:11px;color:#bfd0dd;line-height:1.7}.statusLine{margin:10px 0 0;background:#0d2130;border:1px solid #2d4b59;border-radius:8px;padding:8px 11px;font-size:11px;color:#a8d5db;line-height:1.7}
+.army-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:8px 0}.army-card{background:#13283a;border:1px solid #39556a;border-radius:8px;padding:8px 6px;text-align:left;color:#e9f3f8;min-width:0}.army-card.chosen{background:#20516a;border-color:#8ddcee}.army-card b{display:block;font-size:11px;margin-bottom:5px}.army-card span{display:block;font-size:10px;line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.muted{color:#a7bfcc}.selected{border:1px solid #3b586e;background:#0e2130;padding:10px;border-radius:9px;font-size:11px;line-height:1.75;color:#c2d6e3;margin:9px 0}.selected strong{font-size:13px;color:#e5faf9}.route{color:#abdce7;border-left:3px solid #69bbcf;padding:3px 0 3px 9px;font-size:11px;margin:9px 0}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.actions button{border-radius:8px;border:1px solid #417a8d;color:#edfcff;background:#215468;padding:10px 5px;font-size:11px;font-weight:750}.actions button.alt{background:#2b4053;border-color:#547287}.actions button.def{background:#215a49;border-color:#4c9a7c}.actions button.warn{background:#755235;border-color:#b0805b}.actions button:hover{filter:brightness(1.15)}.actions .full{grid-column:span 2}.cliff{display:flex;align-items:center;gap:9px;justify-content:space-between;background:#192c3b;border:1px solid #495e6a;padding:9px;border-radius:9px;font-size:11px;margin:10px 0}.cliff strong{color:#ffdda6}.controlrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.controlrow button{flex:1;min-width:100px}.log{height:200px;overflow:auto;border-radius:9px;background:#0b1825;border:1px solid #2e4859;padding:3px 10px}.event{font-size:11px;line-height:1.5;padding:5px 0;color:#c8d6df;border-bottom:1px solid #253646}.event strong{color:#7bcddd;margin-right:7px}.event.good{color:#b1efd5}.event.bad{color:#ffb3b5}.event.warn{color:#edd1a5}
+.notegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.note{border:1px solid #2e4c5d;background:#122536;border-radius:10px;padding:12px;font-size:11px;color:#c3d4df;line-height:1.65}.note b{display:block;margin-bottom:5px;font-size:12px;color:#8bddec}.disclaimer{font-size:11px;color:#e1c991;line-height:1.8;margin-top:11px}.endcard:not(:empty){background:#1a3a39;border:1px solid #76b99a;border-radius:9px;padding:11px 12px;margin:10px 0;color:#c8fce2;font-size:12px}.endcard.fail{background:#442934;border-color:#c67d86;color:#ffd0d2}.end-title{font-size:17px;font-weight:800}.award{color:#f5d998;margin:6px 0}.end-actions{display:flex;gap:8px}.end-actions button{background:#235b67;border:1px solid #5da4a4;color:white;border-radius:7px;padding:8px 12px;font-weight:700}
+@media(max-width:1140px){.layout{grid-template-columns:1fr}.notegrid{grid-template-columns:repeat(2,minmax(0,1fr))}.scenario-info{width:100%;margin:4px 0}.settings{gap:5px}}
+@media(max-width:620px){main{padding:15px 9px}header{display:block}header h1{font-size:24px}.alert{display:inline-block;margin-top:8px}.metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.metric{padding:8px}.metric strong{font-size:16px}.metric span{font-size:9px}.notegrid{grid-template-columns:1fr}.panel{padding:9px}}
+.piece.enemyguard{border-style:dotted;background:#45303a;color:#fff0ec;opacity:.82}.ruleflag{font-size:11px;color:#95d6ca;margin-top:7px}
+.command-guide{background:#0c2934;border:1px solid #3f7284;border-radius:9px;font-size:11.5px;line-height:1.8;color:#d4e9ee;padding:10px;margin:0 0 12px}.command-guide b{color:#e8faff}.command-guide span{color:#96c6ce}
+.enemy-camp{background:#2c2634;border-style:dashed;border-color:#83525a;opacity:.75;pointer-events:none;min-height:68px!important}.command-group{border:1px solid #314f63;background:#0f2231;border-radius:9px;padding:10px;margin-top:10px}.group-title{display:flex;justify-content:space-between;gap:7px;font-size:12px;font-weight:800;color:#daedf3;margin-bottom:9px}.group-title small{font-weight:400;color:#99b8c8;font-size:10px}.route-group{background:#132836}.route-btn{background:#215a69!important}.actions button.order-button{min-height:54px;font-size:13px}.actions button.order-button.is-active{border-color:#f0cf7d;outline:2px solid #e9c67f;outline-offset:-3px;background:#635032;color:#fff2cd;box-shadow:0 0 15px #e7b35224}.actions button.order-button:not(.is-active){filter:saturate(.72)}.order-text{margin-top:9px;font-size:11px;color:#bed3df}.route{min-height:35px}
+.csv-area{border:1px solid #3d6575;background:#102c39;border-radius:10px;padding:11px;margin:11px 0}.csv-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#c8f7ff}.csv-title small{font-size:10px;font-weight:500;color:#a2c3cd}.csv-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}.csv-buttons button{border:1px solid #5a8792;background:#1f5162;color:#eaffff;border-radius:7px;padding:9px 4px;font-size:11px;cursor:pointer;font-weight:700}.csv-buttons button:hover{background:#286679}.csv-note{font-size:10.5px;color:#a7c7d2;line-height:1.55}.balance-lab{margin-top:12px;border:1px solid #538879;border-radius:10px;padding:11px;background:#102e32}.balance-lab .csv-title{color:#a5f3dd}.balance-lab button{background:#245e59;border:1px solid #5a9a8c;color:#ecfffa;border-radius:7px;padding:9px 5px;font-size:11px;font-weight:730;cursor:pointer}.balance-lab button:hover{background:#30766b}.balance-file{display:block;padding:7px;color:#c4e4dd;font-size:11px;border:1px dashed #5e9e90;border-radius:7px;width:100%;min-width:0}.balance-note{margin-top:8px;font-size:11px;line-height:1.65;color:#badcd3;margin:9px 0 0}.balance-status{margin-top:8px;font-size:11px;line-height:1.5;color:#d9e9e7;min-height:20px}.balance-status.err{color:#ffb6b5}.balance-status.ok{color:#99e9c1}
+.connections-toggle{display:inline-flex;align-items:center;gap:7px;border:1px solid #486275;border-radius:7px;background:#173044;padding:6px 9px;color:#c5e4ed;cursor:pointer;font-size:11px;white-space:nowrap}.connections-toggle input{accent-color:#79d6d9;width:15px;height:15px;margin:0}.connections-toggle:focus-within{outline:2px solid #a2e7fa;outline-offset:2px}
+
+/* 등록된 경로는 거점/지형 카드 위에 별도 레이어로 표시한다. */
+.planned-routes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;overflow:visible}
+.map-route-summary{position:absolute;right:12px;top:10px;z-index:7;max-width:65%;padding:7px 11px;border-radius:8px;border:1px solid #6bcbc8;background:#102e3bec;box-shadow:0 2px 12px #0009;color:#d5ffff;font-size:11px;font-weight:700;line-height:1.5;pointer-events:none}
+.map-route-summary[hidden]{display:none}
+/* 실제 roadAllows()가 막는 상하 통로만 최소한의 도로 차단 기호로 표시합니다.
+   지도 안의 긴 글자판을 없애 토큰·거점 정보와 겹치지 않도록 합니다. */
+.blocked-path-layer{position:absolute;inset:0;pointer-events:none;z-index:7}
+.blocked-path{position:absolute;transform:translate(-50%,-50%);width:48px;height:15px;
+ display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 3px #0009)}
+.blocked-path::before,.blocked-path::after{content:"";position:absolute;left:50%;height:8px;border-left:2px dotted #a46d6b;opacity:.7;transform:translateX(-50%)}
+.blocked-path::before{bottom:calc(100% + 1px)}
+.blocked-path::after{top:calc(100% + 1px)}
+.block-hatch{display:block;width:44px;height:11px;border:1px solid #f5ad8d;border-radius:3px;
+ background:repeating-linear-gradient(125deg,#d98571 0px,#d98571 7px,#643341 7px,#643341 14px);
+ box-shadow:0 0 0 3px #1a2636d8,0 2px 9px #0008}
+.block-x{position:absolute;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;
+ background:#532631;border:1.5px solid #ffbd9a;color:#fff1dc;font:900 14px/1 system-ui}
+.block-legend{position:relative;display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:25px;height:13px;margin-right:6px}
+.block-legend .block-hatch{width:25px;height:8px}
+.block-legend .block-x{width:12px;height:12px;font-size:10px;border-width:1px}
+.road-notice{font-size:11px;color:#e9beb4;font-weight:700}
+.road-notice.open{color:#9fddca}
+
+.active-route{filter:drop-shadow(0 0 4px #081923)}
+.objective-line{margin:0 0 12px;padding:9px 12px;border:1px solid #476777;border-radius:9px;background:#0e2635;color:#d7eef6;font-size:12px;line-height:1.5}.objective-line strong{color:#9fe4d9}.objective-line span{color:#65879a;margin:0 6px}.map-rule{font-size:11px;color:#b9d0de;line-height:1.55;margin:8px 0 0}.command-guide span{display:block;margin-top:3px}.balance-warning{display:block;color:#e4c99a;margin-top:2px}.rules-details{margin-top:13px;background:#112536;border:1px solid #35556a;border-radius:10px;padding:10px 13px;color:#c7d9e4;font-size:12px}.rules-details summary{cursor:pointer;font-weight:750;color:#c0eaf2;list-style-position:inside}.rules-details[open] summary{margin-bottom:10px}.rules-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-size:11px;line-height:1.65}.rules-grid>div{background:#0d1e2c;border-radius:8px;padding:10px}.rules-grid b{display:block;color:#9bdfdc;margin-bottom:4px}.csv-note{margin:4px 0 8px}.disclaimer{font-size:10px;line-height:1.5;color:#baa77f;margin-top:12px}@media(max-width:620px){.rules-grid{grid-template-columns:1fr}.objective-line{font-size:11px}}
+
+/* 짧은 온보딩: 게임 로딩 시 한 화면에서 조작의 큰 틀만 소개합니다. */
+#tutorialBackdrop{position:fixed;inset:0;background:#040c18c9;backdrop-filter:blur(3px);z-index:109}
+#tutorialBackdrop[hidden],#tutorialCard[hidden]{display:none!important}
+#tutorialCard{position:fixed;z-index:110;top:50%;left:50%;transform:translate(-50%,-50%);width:min(760px,calc(100vw - 32px));max-height:min(88vh,850px);max-height:min(88dvh,850px);overflow-y:auto;background:linear-gradient(155deg,#1a3749,#0e2130 80%);border:1px solid #73c6d5;border-radius:20px;box-shadow:0 24px 100px #000e,0 0 0 1px #67cfd02e;color:#eefaff;padding:28px 30px}
+.tutorial-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.tutorial-eyebrow{display:block;color:#8ddeda;font-size:11px;letter-spacing:.12em;font-weight:800;margin-bottom:7px}
+#tutorialTitle{font-size:26px;letter-spacing:-.035em;line-height:1.35;font-weight:850;margin:0}
+#tutorialLead{margin:8px 0 0;color:#b9d6e3;font-size:14px;line-height:1.6}
+.tutorial-close{flex:0 0 auto;border:1px solid #5b8391;background:#204153;border-radius:9px;color:#d9f7fa;font-size:23px;width:38px;height:38px;line-height:1.1}
+.tutorial-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:23px 0 18px}
+.tutorial-step{padding:16px 16px 18px;border:1px solid #456c7e;background:#112b3c;border-radius:12px;min-height:112px}
+.tutorial-number{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;background:#24586a;color:#bbf4f5;font-weight:850;margin-right:7px;font-size:13px}
+.tutorial-step strong{font-size:15px;color:#efffff;vertical-align:middle}
+.tutorial-step p{font-size:13px;margin:9px 0 0;color:#c6dae6;line-height:1.6}
+.tutorial-shortnote{border-left:3px solid #74c6b3;padding:9px 12px;background:#163d40;color:#d2eee6;font-size:12px;line-height:1.6;border-radius:0 8px 8px 0}
+.tutorial-actions{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:19px}
+.tutorial-reopen-note{color:#aac9d3;font-size:12px;line-height:1.55}
+#tutorialSkip{background:#287b68;color:#fff;border:1px solid #76d9b4;border-radius:10px;font-size:15px;font-weight:850;padding:13px 24px;min-width:176px;box-shadow:0 6px 20px #123c30}
+#tutorialSkip:hover{background:#329379}
+#openTutorial{border-color:#56bbb9;color:#ddffff;font-size:12px;padding:9px 13px;background:#194756}
+@media(max-width:620px){#tutorialCard{padding:19px 17px;border-radius:14px;max-height:92dvh}.tutorial-steps{grid-template-columns:1fr;gap:8px;margin:16px 0}.tutorial-step{min-height:0;padding:10px 12px}.tutorial-step p{margin:5px 0 0}#tutorialTitle{font-size:21px}#tutorialLead{font-size:12px}.tutorial-actions{align-items:stretch;flex-direction:column-reverse}#tutorialSkip{width:100%}.tutorial-reopen-note{text-align:center}.tutorial-shortnote{font-size:11px}}
+.cliff-help{font-size:11px;line-height:1.5;color:#a9c6d2;margin:-3px 0 10px 2px}.cliff-help b{color:#dceff7}
+/* v24.5: 선택 상태와 다음 조작이 우선적으로 읽히도록 계층을 조정 */
+.mobile-map-hint{display:none}
+@media(max-width:930px){.mobile-map-hint{display:block;color:#aad5dd;font-size:11px;margin:2px 0 8px;padding-left:4px}}
+.fort-node{cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,filter .15s ease}
+.fort-node:hover{filter:brightness(1.16);border-color:#acdfea}
+.fort-node.selected{outline:3px solid #b4f5e8;outline-offset:3px;box-shadow:0 0 0 6px #3e9c9440,0 7px 22px #0008}
+.army-card{cursor:pointer;transition:background .15s,border-color .15s}
+.army-card:hover{border-color:#8cc9d8;background:#204259}
+.army-card.chosen{border:1px solid #a2e9d9;background:#224b56;box-shadow:inset 4px 0 0 #9befd7}
+.army-card.chosen b{color:#d6fff2}
+.selected{border-color:#598093;background:#122c3d}
+#orderText.next-action{border:1px solid #537b83;border-radius:8px;background:#15323d;color:#dcf7f4;
+ padding:10px 12px;font-size:12px;font-weight:700;margin:8px 0 12px;line-height:1.55}
+#orderText.next-action[data-phase="route"]{border-color:#6b9aaf;background:#152f42;color:#d3f0ff}
+#orderText.next-action[data-phase="order"]{border-color:#d2aa62;background:#372e27;color:#ffe4b0}
+#orderText.next-action[data-phase="go"]{border-color:#64bfa1;background:#14372e;color:#cbffe9}
+.actions button{transition:background .15s,filter .15s,transform .12s}
+.actions button:enabled:active{transform:translateY(1px)}
+.actions #waypoint.is-ready{border-color:#89d8dc;background:#286c79!important;box-shadow:0 0 0 1px #80e1e73d}
+.controlrow{margin-top:13px}
+.controlrow #tick{background:#237b69;color:white;border-color:#85d3b1;font-size:13px;font-weight:800;padding:12px 10px}
+.controlrow #tick:enabled:hover{background:#329a80}
+.controlrow #skip,.controlrow #auto{background:#183649}
+.command-guide{border-left:4px solid #67c6bf}
+.map-foot{gap:6px 15px}
+#roadNotice{display:inline-flex;align-items:center;gap:4px}
+@media(max-width:620px){.controlrow #tick{min-width:125px}.fort-node:hover{filter:none}}
+
+/* v24.6 - 지도 실제 칸 사이 중심의 차단 표시 */
+.blocked-path-layer svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.blocked-path-layer .blocked-rail{stroke:#b98486;stroke-width:4;stroke-dasharray:5 6;opacity:.8}
+.blocked-path-layer .blocked-halo{fill:#291a2ad9;stroke:#ffac93;stroke-width:3}
+.blocked-path-layer .blocked-symbol{fill:#ffdece;font-size:23px;font-weight:900;text-anchor:middle;dominant-baseline:central}
+.blocked-path-layer .blocked-cap{stroke:#ffba9a;stroke-width:4.5;stroke-linecap:round}
+/* 실제 조작을 따라 진행하는 실습 안내 */
+#practiceCoach[hidden]{display:none!important}
+#practiceCoach{position:fixed;z-index:101;right:18px;bottom:17px;width:min(380px,calc(100vw - 24px));padding:16px 17px 15px;background:#142b3eeF;border:2px solid #81dfd1;box-shadow:0 16px 60px #000d,0 0 0 1px #93e6de44;border-radius:15px;backdrop-filter:blur(8px)}
+#practiceCoach .practice-top{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;color:#9fe4da;font-weight:800}
+#practiceCoach strong{display:block;font-size:18px;line-height:1.35;margin:8px 0;color:#f5ffff}
+#practiceCoach p{font-size:13px;line-height:1.65;color:#c6e4e9;margin:0 0 12px}
+#practiceCoach button{padding:8px 10px;color:#e5f6ff;border:1px solid #557d8d;border-radius:8px;background:#1b4657;font-size:12px}
+#practiceCoach .practice-buttons{display:flex;gap:8px;flex-wrap:wrap}
+#practiceCoach #practiceExit{margin-left:auto}
+.practice-spotlight{outline:4px solid #ffe099!important;outline-offset:4px!important;box-shadow:0 0 0 8px #eab54b3d,0 0 22px #ffe09f90!important;position:relative;isolation:isolate;z-index:12!important;animation:practicePulse 1.8s ease-in-out infinite}
+.fort-node.practice-spotlight{position:absolute}
+@keyframes practicePulse{0%,100%{outline-color:#ffe099}50%{outline-color:#fff6d9}}
+#tutorialPractice{background:#23678b;color:#ffffff;border:1px solid #90dffa;border-radius:10px;font-size:15px;font-weight:850;padding:13px 17px;min-width:174px}
+#tutorialSkip{min-width:155px;padding:12px 15px;background:#1c4650;border-color:#648d9b}
+.tutorial-actions{justify-content:flex-end;flex-wrap:wrap}
+.tutorial-reopen-note{margin-right:auto;max-width:230px}
+/* CSV 열 사전은 필요한 때만 펼쳐 확인할 수 있게 */
+.csv-help{margin:11px 0 0;border:1px solid #568895;border-radius:9px;background:#112b39;color:#d7eef3;font-size:11.5px;line-height:1.6}
+.csv-help>summary{list-style:none;cursor:pointer;padding:11px 12px;font-weight:800;color:#9deded;font-size:12px}
+.csv-help>summary::-webkit-details-marker{display:none}
+.csv-help>summary:before{content:'▸ ';color:#bdebd7}
+.csv-help[open]>summary:before{content:'▾ '}
+.csv-help-inner{border-top:1px solid #355a6a;padding:11px 12px}
+.csv-help-inner p{margin:0 0 9px}
+.csv-help-inner b{color:#edffff}
+.csv-dictionary{width:100%;border-collapse:collapse;font-size:11px}
+.csv-dictionary th,.csv-dictionary td{padding:6px 5px;border-bottom:1px solid #2d5061;vertical-align:top;text-align:left}
+.csv-dictionary th{color:#9dd9de;font-size:10px}
+.csv-dictionary code{color:#ffe6b1;word-break:break-all;font-size:10px}
+.csv-tip{background:#173b44;border-left:3px solid #72cbb9;padding:8px 10px;border-radius:4px;font-size:11px}
+@media(max-width:620px){#practiceCoach{right:8px;bottom:8px;width:calc(100vw - 16px);padding:11px 13px}#practiceCoach strong{font-size:16px}#practiceCoach p{font-size:12px}.tutorial-actions{flex-direction:column}.tutorial-reopen-note{max-width:unset;text-align:center}#tutorialPractice,#tutorialSkip{width:100%}}
+
+/* v24.9 초보자 튜토리얼: 행동 하나 + 정확한 위치 + 실수 방지 */
+#tutorialCard{width:min(520px,calc(100vw - 28px));padding:25px 25px 20px;max-height:90dvh;overflow-y:auto;border:1px solid #74c6c4;border-radius:16px;background:#122b3b}
+#tutorialTitle{font-size:26px;line-height:1.25}
+#tutorialLead{margin:12px 0;color:#e5f0f4;font-size:14px;line-height:1.65}
+.easy-directions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:11px 0 14px}
+.easy-directions span{display:block;padding:10px;border-radius:9px;background:#1d4052;border:1px solid #476d7c;color:#e9f6fb;font-size:12px;line-height:1.5;text-align:center}
+.easy-directions b{display:block;color:#9ceacb;font-size:12px}
+.easy-sequence{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:5px;background:#0c202e;border:1px solid #416b7b;border-radius:10px;padding:13px 8px}
+.easy-sequence span{font-size:12px;font-weight:850;color:#fbffff;white-space:nowrap;background:#214454;border-radius:7px;padding:7px 6px}
+.easy-sequence b{font-size:17px;color:#7fd7cb;font-weight:900}
+.easy-goal{font-size:12.5px;line-height:1.7;color:#d5e5ef;margin-top:13px}
+.easy-goal b{color:#9ee8d8;margin-right:5px}
+.easy-more{margin-top:8px;color:#adced9;font-size:12px;border-radius:7px}
+.easy-more summary{cursor:pointer;padding:8px 0;font-weight:700;color:#98d4dc}
+.easy-more p{background:#0c2332;padding:10px 13px;border-radius:8px;line-height:1.75;margin:2px 0 0}
+#tutorialCard .tutorial-actions{display:flex;gap:9px;margin:17px 0 0;align-items:center}
+#tutorialPractice{flex:1 1 210px;min-height:47px;min-width:0;padding:10px;background:#248468;color:#fff;border:1px solid #73ebc2;border-radius:9px;font-size:15px;font-weight:850}
+#tutorialSkip{flex:0 1 124px;min-height:47px;min-width:100px;padding:10px;background:#1a384a;color:#e8f5fb;border:1px solid #608497;border-radius:9px;font-size:13px;font-weight:750;box-shadow:none}
+#tutorialCard .tutorial-reopen-note{margin:12px 0 0;text-align:center;max-width:none;font-size:11px;color:#b8d4db}
+#practiceCoach{position:fixed;z-index:101;bottom:16px;right:16px;width:min(360px,calc(100vw - 28px));padding:13px 15px;background:#112d3cf9;border:2px solid #7de4c4;border-radius:12px;box-shadow:0 14px 42px #000b;max-height:none;overflow:visible}
+#practiceCoach[data-dock="left"]{right:auto;left:16px}
+#practiceCoach .practice-top{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#a9efdb;font-weight:800;font-size:12px}
+#practiceCoach .practice-subtitle{font-size:11px;color:#b5d3db}
+#practiceCoach .practice-step-track{display:flex;gap:5px;margin:8px 0}
+#practiceCoach .practice-step-track i{flex:1;height:4px;border-radius:5px;background:#3d6271}
+#practiceCoach .practice-step-track i.done{background:#79d7ae}
+#practiceCoach .practice-step-track i.current{background:#ffe39a}
+#practiceCoach strong{display:block;color:#fff;font-size:19px;line-height:1.3;margin:3px 0 5px}
+#practiceCoach p{font-size:13px;line-height:1.6;color:#e2eff3;margin:0 0 8px}
+#practiceCoach .practice-hint{color:#ffe2a8;font-size:12px;line-height:1.5;margin:0 0 8px}
+#practiceCoach .practice-hint:empty{display:none}
+#practiceCoach .practice-buttons{display:flex;align-items:center;justify-content:space-between;gap:7px}
+#practiceCoach button{background:#1d4657;border:1px solid #608395;color:#eff9fa;font-size:12px;font-weight:750;padding:7px 11px;border-radius:8px}
+#practiceCoach #practiceExit{margin-left:auto;background:transparent;color:#c6dce4}
+#practiceCoach #practiceNext{background:#24745e;border-color:#79deb9;color:#fff}
+#practiceCoach #practiceNext[hidden],#practiceCoach #practiceFind[hidden]{display:none!important}
+.practice-spotlight{outline:3px solid #ffe29f!important;outline-offset:4px!important;box-shadow:0 0 0 5px #efb95035,0 0 17px #ffe09f86!important;position:relative;isolation:isolate;z-index:25!important;animation:none!important;scroll-margin:150px 10px}
+.fort-node.practice-spotlight{position:absolute}
+.practice-spotlight::after{content:'여기 클릭 ↓';position:absolute;bottom:calc(100% + 9px);right:1px;border:1px solid #ffe2a3;background:#f7d98a;color:#243344;padding:3px 9px;border-radius:7px;white-space:nowrap;font-size:12px;font-weight:900;line-height:1.4;pointer-events:none;box-shadow:0 3px 8px #0018;z-index:28}
+@media(max-width:700px){
+ #tutorialCard{padding:18px 16px;max-height:91dvh}
+ #tutorialTitle{font-size:22px}
+ #tutorialLead{font-size:13px}
+ .easy-sequence{gap:4px;padding:11px 5px}
+ .easy-sequence span{font-size:11px;padding:6px 5px}
+ .easy-sequence b{font-size:14px}
+ .easy-directions span{font-size:11px;padding:8px 5px}
+ #tutorialCard .tutorial-actions{flex-wrap:wrap}
+ #tutorialPractice,#tutorialSkip{flex:1 1 100%;width:100%;min-width:0}
+ #practiceCoach,#practiceCoach[data-dock="left"]{left:8px;right:8px;bottom:8px;width:auto;padding:9px 12px}
+ #practiceCoach strong{font-size:16px}
+ #practiceCoach p{font-size:12px;margin-bottom:6px}
+ #practiceCoach .practice-step-track{margin:6px 0}
+ #practiceCoach .practice-buttons button{padding:6px 9px;font-size:11px}
+ .practice-spotlight::after{font-size:11px;padding:3px 7px}
+}
+
+/* v24.10 tutorial readability overrides */
+#tutorialCard{width:min(560px,calc(100vw - 28px));padding:24px 24px 20px;border-radius:16px;background:#122b3b}
+#tutorialTitle{font-size:27px;line-height:1.28;letter-spacing:-.02em}
+#tutorialLead{margin:10px 0 0;color:#e5f0f4;font-size:14px;line-height:1.7}
+.tutorial-plain{margin-top:14px;padding:11px 13px;border-radius:10px;background:#0d2230;border:1px solid #355668;color:#d6e7ee;font-size:12.5px;line-height:1.7}
+.split-flow{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0 12px}
+.split-step{padding:14px 14px 13px;border-radius:12px;background:#173446;border:1px solid #446879;color:#eff8fb}
+.split-kicker{display:inline-block;margin-bottom:7px;padding:4px 8px;border-radius:999px;background:#0f2534;border:1px solid #54758a;color:#a9dbe2;font-size:11px;font-weight:800}
+.split-step strong{display:block;font-size:16px;line-height:1.45;margin-bottom:4px}
+.split-step p{margin:0;color:#d4e3ea;font-size:13px;line-height:1.65}
+.split-step.right{background:#18364a}
+.split-step.left{background:#243142}
+.quick-note{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#143327;border:1px solid #4f8d71;color:#daf0e1;font-size:12px;line-height:1.65}
+#tutorialCard .tutorial-actions{display:flex;gap:10px;margin:18px 0 0;align-items:center}
+#tutorialPractice{flex:1 1 220px;min-height:48px;min-width:0;padding:11px 12px;border-radius:10px}
+#tutorialSkip{flex:0 1 126px;min-height:48px;border-radius:10px}
+#practiceCoach{width:min(370px,calc(100vw - 28px))}
+.practice-spotlight::after{content:'여기 클릭'}
+@media(max-width:700px){
+ #tutorialCard{padding:18px 16px;max-height:91dvh}
+ #tutorialTitle{font-size:22px}
+ #tutorialLead{font-size:13px}
+ .split-step{padding:11px 12px}
+ .split-step strong{font-size:15px}
+ .split-step p,.tutorial-plain,.quick-note{font-size:12px}
+}
+
+/* v24.11: 주제별로 선택하는 초보자용 사용법 */
+#tutorialCard{width:min(575px,calc(100vw - 30px));padding:24px 25px 19px;background:#122b3b}
+#tutorialTitle{font-size:25px;letter-spacing:-.035em}
+#tutorialLead{font-size:14px;line-height:1.7;margin:10px 0 15px}
+.lesson-menu{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.lesson-menu[hidden],.lesson-info[hidden]{display:none!important}
+.lesson-card{min-width:0;min-height:130px;padding:15px;text-align:left;border-radius:12px;background:#182f40;border:1px solid #466578;color:#f0fbff;display:flex;flex-direction:column;align-items:flex-start;gap:5px;transition:background .15s,border-color .15s}
+.lesson-card:hover,.lesson-card:focus-visible{background:#20465a;border-color:#89d6d8}
+.lesson-card strong{font-size:17px;line-height:1.35}
+.lesson-card>span:last-child{font-size:12px;color:#b8d2df;line-height:1.5}
+.lesson-number{font-weight:800;color:#8ee4cd;font-size:11px;letter-spacing:.02em}
+.lesson-info{margin-top:6px}
+.lesson-info-top{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#8ed6c6;font-size:12px;font-weight:750}
+#lessonBack{border:1px solid #4e7380;background:#193c4e;border-radius:8px;padding:6px 12px;color:#eaf8fc;font-size:13px}
+.lesson-info h3{font-size:23px;letter-spacing:-.03em;margin:12px 0 6px}
+.lesson-info>p{font-size:14px;line-height:1.7;color:#d6e8ee;margin:0 0 13px}
+.lesson-detail-list{display:grid;gap:8px}
+.lesson-detail-item{background:#19394b;border:1px solid #466c7a;padding:11px 12px;border-radius:10px}
+.lesson-detail-item strong{display:block;color:#a1e6d0;font-size:13px;margin-bottom:3px}
+.lesson-detail-item span{display:block;font-size:13px;line-height:1.6;color:#e5f1f6}
+.lesson-launch{width:100%;margin-top:16px;min-height:48px;border-radius:10px;background:#217e67;border:1px solid #83dfba;color:white;font-size:15px;font-weight:800}
+.lesson-launch[hidden]{display:none!important}
+#tutorialCard .tutorial-actions{justify-content:flex-end;margin-top:14px}
+#tutorialSkip{min-height:42px;flex:0 0 auto;min-width:112px}
+#practiceCoach,#practiceCoach[data-dock="left"]{bottom:14px;right:14px;left:auto;width:min(336px,calc(100vw - 24px));border:1px solid #76cfbb;padding:12px 14px}
+#practiceCoach strong{font-size:17px}
+#practiceCoach .practice-hint{font-size:11.5px;color:#c9eadc}
+.practice-spotlight::after{content:'여기 누르기';font-size:11px}
+@media(max-width:620px){
+ #tutorialCard{padding:19px 15px;max-height:91dvh}
+ #tutorialTitle{font-size:21px}
+ #tutorialLead{font-size:13px}
+ .lesson-menu{gap:8px}
+ .lesson-card{min-height:115px;padding:11px}
+ .lesson-card strong{font-size:15px}
+ .lesson-card>span:last-child{font-size:11px}
+ #practiceCoach,#practiceCoach[data-dock="left"]{bottom:8px;right:8px;left:8px;width:auto;padding:10px 12px}
+ #practiceCoach strong{font-size:16px}
+}
+
+/* v24.12 · 명령 중심의 정보 위계와 일관된 서체 크기 */
+body{background:#0c1622;color:#eaf3f7;font-size:14px;line-height:1.55}
+header h1{font-size:28px;letter-spacing:-.035em}
+header p{font-size:13px;line-height:1.55}
+.eyebrow{font-size:11px;letter-spacing:.06em;color:#a6c6d4}
+.panel{background:#132233;border-color:#334a5b}
+.panel h2{font-size:17px;align-items:center}
+.panel h2 small{font-size:12px}
+.metric{background:#132536;border-color:#354b5b;padding:10px 12px}
+.metric span{font-size:12px}
+.metric strong{font-size:20px}
+.legend{font-size:12px;line-height:1.5}
+.fort-node{padding:9px 10px}
+.fort-node strong{font-size:13px}
+.fort-node .meta,.fort-node .hp-line,.fort-node .extra{font-size:10px}
+.piece,.piece small{font-size:10px}
+.army-card{padding:8px 7px}
+.army-card b{font-size:12px}
+.army-card span{font-size:11px}
+.selected{margin:6px 0;padding:7px 9px;font-size:12px;line-height:1.55}
+.selected strong{font-size:13px}
+#orderText.next-action{margin:7px 0 9px;padding:8px 10px;font-size:12px}
+.command-guide{margin-bottom:6px;padding:7px 9px;font-size:12px;line-height:1.5}
+.command-guide b{display:block;font-size:12.5px}
+.command-guide span{display:block;margin-top:3px;color:#b4d1da}
+.command-group{padding:7px 9px;margin-top:6px;background:#132638}
+.group-title{margin-bottom:5px;font-size:12px}
+.group-title small{font-size:11px}
+.actions button{font-size:12px;min-height:39px}
+.actions button.order-button{min-height:45px;font-size:13px}
+.route{margin:4px 0;font-size:11.5px;min-height:28px}
+.order-mini-help{margin:7px 0 0;color:#bed0dd;font-size:11.5px;line-height:1.5}
+.controlrow{position:relative;z-index:20;display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:7px;margin:10px 0;padding:7px;background:#102331;border:1px solid #4f7984;border-radius:10px;box-shadow:0 7px 24px #0007}
+.controlrow button{min-width:0!important;padding:10px 6px;font-size:12px}
+.controlrow #tick{font-size:14px;min-height:45px;padding:10px 5px;background:#237b69}
+.cliff{margin:10px 0 5px;padding:9px 10px;font-size:12px;background:#192b3c}
+.cliff strong{font-size:12.5px}
+.cliff-help{font-size:11.5px;margin:0 2px 4px}
+.heal-line{font-size:11.5px;margin:5px 2px 10px;color:#9ebfbb}
+.data-panel{margin:12px 0 8px;border:1px solid #3c5769;border-radius:10px;overflow:hidden;background:#102537}
+.data-panel-summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;min-height:46px;padding:11px 12px;font-size:13px;font-weight:700;color:#d1e9ed}
+.data-panel-summary::-webkit-details-marker{display:none}
+.data-panel-summary::before{content:'▸';color:#91ccc5;margin-right:4px}
+.data-panel[open]>.data-panel-summary::before{content:'▾'}
+.data-panel-summary span{margin-right:auto}
+.data-panel-summary small{font-size:11px;color:#aac5ce;font-weight:400}
+.data-panel .balance-lab{margin:0;border:0;border-top:1px solid #345368;border-radius:0;background:transparent}
+.log{height:170px}
+.event{font-size:11.5px}
+#tutorialCard{border-color:#577f90;background:#142939}
+#tutorialTitle{font-size:24px}
+.lesson-card{border-color:#446577}
+.lesson-card strong{font-size:15px}
+.lesson-card span{line-height:1.45}
+.lesson-number{letter-spacing:0!important}
+.tutorial-eyebrow{letter-spacing:.04em}
+#practiceCoach{border:1px solid #78c5b6;background:#112c3cee}
+.practice-spotlight{outline:3px solid #f4cf7f!important;outline-offset:3px!important;box-shadow:0 0 0 4px #e5ac5039!important;animation:none!important}
+.practice-spotlight::after{content:'눌러 주세요';font-size:11px;padding:3px 7px}
+.smallbtn:focus-visible,.army-card:focus-visible,.fort-node:focus-visible,.lesson-card:focus-visible{outline:2px solid #f1d796;outline-offset:3px}
+@media(max-width:620px){
+ header h1{font-size:24px}
+ .panel h2{font-size:16px}
+ .metric span{font-size:10.5px}
+ .metric strong{font-size:17px}
+ .controlrow{bottom:5px;margin:8px 0;padding:5px;gap:5px}
+ .controlrow button{font-size:11px}
+ .controlrow #tick{font-size:12px}
+ .data-panel-summary{font-size:12px}
+ .lesson-menu{grid-template-columns:1fr;gap:7px}
+ .lesson-card{min-height:75px;padding:9px 12px;gap:2px}
+ .lesson-card strong{font-size:15px}
+ .lesson-card>span:last-child{font-size:12px}
+}
+
+/* A single compact warning, only shown while raiders are alive */
+.raid-notice{margin:10px 0 0;padding:10px 12px;background:#452b33;border:1px solid #cf7d7e;border-left:4px solid #e99a96;border-radius:8px;color:#ffe1e0;font-size:12px;font-weight:650;line-height:1.55}
+.raid-notice[hidden]{display:none!important}
+.piece.enemy.raider{border:2px solid #ffbab1;background:#65313a;color:#fff4ed}
+
+/* v24.17 · 시뮬레이터 안내 문구 시각 통일 */
+#tutorialCard{background:#142735;border-color:#496578;box-shadow:0 22px 80px #000b}
+#tutorialTitle{font-size:23px;font-weight:750;letter-spacing:-.025em}
+#tutorialLead{font-size:13px;color:#b8cedb;line-height:1.6}
+.tutorial-eyebrow{font-size:11px;color:#91bbcb;letter-spacing:0;font-weight:650}
+.lesson-card{min-height:105px;gap:5px;border-color:#405b6e;background:#193144}
+.lesson-card strong{font-size:15px;font-weight:750}
+.lesson-number{font-size:11px;font-weight:700;color:#a4c4d2;letter-spacing:0}
+.lesson-card>span:last-child{font-size:12px;color:#b5cbd8}
+.lesson-info h3{font-size:21px;font-weight:750}
+.lesson-detail-item{background:#173347;border-color:#38596d}
+.lesson-detail-item strong{color:#acd3da}
+#practiceCoach{background:#142b3af7;border-color:#638d9a}
+#practiceCoach strong{font-size:17px;font-weight:750}
+#practiceCoach .practice-subtitle{color:#b0c9d6}
+#practiceCoach .practice-hint{color:#c0d3db}
+.practice-spotlight::after{content:'선택';background:#e9ce96;color:#243140;border-color:#dfc28e}
+@media(max-width:620px){.lesson-card{min-height:72px}}
+.pin.hq{background:#c49d78}
+
+/* 최종 안정화 · 가독성, 입력 접근성, 반응형 정리 (기존 전투 규칙 유지) */
+:root{color-scheme:dark;--sub:#bfd0dd}
+html{scroll-behavior:smooth}
+body{font-size:14px;-webkit-text-size-adjust:100%;text-rendering:optimizeLegibility}
+button,select,input{font-family:inherit}
+button{touch-action:manipulation}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{
+ outline:3px solid #a6ecde;outline-offset:3px
+}
+.settings select,.settings .smallbtn{min-height:39px}
+.settings label{font-size:12px;font-weight:700;color:#d5e4ee}
+.scenario-info{line-height:1.55;font-size:12px}
+.metric span{font-size:12px;color:#c6d7df}
+.panel h2 small{color:#c1d5df}
+.map-foot,.map-rule,.statusLine,.road-notice{font-size:12px}
+.legend{gap:9px 14px;color:#d0e0e8;font-size:12px}
+.fort-node{min-width:125px;max-width:154px;padding:10px}
+.fort-node strong{font-size:13px;line-height:1.35}
+.fort-node .meta,.fort-node .hp-line,.fort-node .extra{font-size:10.5px;line-height:1.4}
+.fort-node .extra{overflow-wrap:anywhere}
+.piece{font-size:10.5px;min-height:30px;padding:4px 6px}
+.piece small{font-size:10px}
+.army-card{min-height:84px}
+.army-card b{font-size:12px}
+.army-card span{font-size:11.5px;line-height:1.5}
+.selected,#orderText.next-action,.command-guide{font-size:12.5px}
+.route,.order-mini-help,.cliff-help,.heal-line{font-size:12px;line-height:1.55}
+.actions button,.smallbtn{min-height:41px;font-size:12px}
+.actions button.order-button{min-height:48px}
+.log{scrollbar-color:#53778a #0b1825}
+.event{font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.data-panel-summary,.csv-help>summary,.rules-details summary{min-height:42px}
+#practiceCoach{max-height:calc(100dvh - 24px);overflow-y:auto}
+#practiceCoach .practice-hint{color:#e7d29c}
+#tutorialCard{overscroll-behavior:contain}
+#result .end-actions{flex-wrap:wrap;margin-top:10px}
+#result .end-actions button{min-height:40px}
+@media(max-width:930px){
+ .field{min-width:910px;height:575px}
+ .mobile-map-hint{font-size:12px;color:#c1e5e9}
+ .scroll{scrollbar-color:#5a8b9a #172f43;scrollbar-width:thin}
+}
+@media(max-width:620px){
+ main{padding:15px 10px 32px}
+ header p{font-size:12.5px}
+ .settings{margin:14px 0 12px;gap:7px}
+ .scenario-info{margin-top:4px;font-size:11.5px}
+ .metrics{gap:6px}
+ .metric{padding:10px 9px;min-height:72px}
+ .metric strong{font-size:18px}
+ .metric span{font-size:10.5px;line-height:1.45}
+ .legend{font-size:11.5px;gap:7px 12px}
+ .panel{padding:11px}
+ .fort-node .meta,.fort-node .hp-line,.fort-node .extra{font-size:11px}
+ .army-grid{gap:6px}
+ .army-card{padding:9px 7px;min-height:91px}
+ .army-card b{font-size:11.5px}
+ .army-card span{font-size:11px}
+ .group-title{flex-wrap:wrap}
+ .group-title small{font-size:11px}
+ .controlrow{position:static;z-index:auto}
+ .controlrow button{min-height:45px}
+ .cliff{gap:6px;flex-wrap:wrap}
+ .cliff>.actions{width:100%;min-width:0!important}
+ .csv-dictionary{font-size:10.5px}
+ .csv-dictionary th,.csv-dictionary td{padding:7px 5px}
+ #tutorialCard{max-height:90dvh;max-height:90svh}
+}
+@media(prefers-reduced-motion:reduce){
+ html{scroll-behavior:auto}
+ .piece,.fort-node,.army-card,.actions button{transition:none!important}
+}
+</style></head><body><main>
+<header><div><div class="eyebrow">전술 시뮬레이터</div><h1>회색갈기 대공세</h1><p>세 지휘 부대의 이동 경로를 지정하고 클리프를 지휘해 적 본진을 점령하세요.</p></div><div class="alert">비공식 전술 프로토타입</div></header>
+<div class="settings"><label for="stageSelect">전장</label><select id="stageSelect"><option value="0">제1전장 · 국경 돌파</option><option value="1">제2전장 · 요새 공방</option><option value="2">제3전장 · 최후 대공세</option></select><label for="difficultySelect">난이도</label><select id="difficultySelect"><option value="standard">표준</option><option value="challenge">도전</option></select><button id="applySetting" class="smallbtn" type="button">전장 시작</button><button id="openTutorial" class="smallbtn" type="button" aria-controls="tutorialCard" aria-expanded="true">사용 방법</button><div class="scenario-info"><b id="scenarioName">제1전장</b><span id="scenarioDesc">전장 소개</span></div></div>
+<div class="metrics"><div class="metric"><strong id="turnValue">0</strong><span>진행 턴</span></div><div class="metric"><strong id="baseValue">155 / 155</strong><span>회색갈기 본진 HP</span><div class="bar"><b id="baseBar" style="width:100%"></b></div></div><div class="metric"><strong id="holdValue">0 / 9</strong><span>아군 점령 거점</span></div><div class="metric"><strong id="waveValue">1</strong><span>적 증원 단계</span></div><div class="metric"><strong id="troopsValue">3 : 2</strong><span>기동 병력 (아군 : 적군)</span></div><div class="metric"><strong id="recordValue">—</strong><span title="현재 브라우저에 저장된 전장별 기록">브라우저 최단</span></div></div>
+<div class="layout"><section class="panel"><h2>전술 지도 <small>거점·병력 현황</small></h2><div class="legend"><span><i class="pin a"></i>아군</span><span><i class="pin e"></i>적군</span><span><i class="pin h"></i>클리프</span><span><i class="pin hq"></i>적 본진</span><span>일반 6 · 요새 2 · 병기 1</span><span>같은 칸의 일반병은 묶어서 표시</span><span>제2·3전장 침투병: 출격지 위협</span><span><span class="block-legend" aria-hidden="true"><span class="block-hatch"></span><span class="block-x">×</span></span>상하 통로 차단 (대각 우회 가능)</span></div><div class="objective-line"><strong>승리</strong> 제3전선 거점 3곳 확보 → 적 본진 점령 <span>·</span> <strong>패배</strong> 아군 본진 HP 0</div><div class="mobile-map-hint">↔ 모바일: 지도 좌우 이동</div><div class="raid-notice" id="raidNotice" role="status" aria-live="polite" hidden></div><div class="scroll"><div id="field" class="field"><svg id="roads" class="roads" viewBox="0 0 1000 560" preserveAspectRatio="none"></svg><div id="places"></div><svg id="plannedRoutes" class="planned-routes" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true"></svg><div id="blockedPaths" class="blocked-path-layer" aria-label="상하 통행이 차단된 구간"></div><div id="routeSummary" class="map-route-summary" role="status" hidden></div><div id="tokens"></div></div></div><div class="map-foot"><span id="unlockText">전선 개방</span><span id="roadNotice" class="road-notice" role="status">통행 상태 확인 중</span></div><div class="statusLine" id="effectText"></div><p class="map-rule">전선 개방: 직전 전선 거점 1곳 이상 점령 · 잠긴 목표 지정 시 이동 가능한 전선까지 진격 · 노란 점선: 개방 대기</p></section>
+<section class="panel"><h2>부대 지휘 <button class="smallbtn" id="restart" type="button">전장 재시작</button></h2><p class="command-guide"><b>부대 선택 → 거점 선택 → 경로 등록 → 명령 → 턴 진행</b></p><div id="units" class="army-grid"></div><div id="selectedText" class="selected"></div><div id="orderText" class="order-text next-action" data-phase="route" role="status" aria-live="polite"></div><div class="command-group route-group"><div class="group-title">경로 지정 <small id="routeHelp">선택 거점을 경유지로 등록</small></div><div class="actions"><button id="waypoint" class="route-btn">경로 선택</button><button id="clearRoute" class="alt">경로 초기화</button></div></div><div class="route" id="routeText" role="status" aria-live="polite"></div><div class="command-group"><div class="group-title">이동 명령 <small>경로 등록 필요</small></div><div class="actions orders"><button id="advance" class="order-button" aria-pressed="false">진격</button><button id="rush" class="order-button alt" aria-pressed="false">우선이동</button></div><p class="order-mini-help">진격: 교전하며 이동 · 우선이동: 공격 없이 이동</p></div><div class="controlrow" aria-label="턴 진행"><button class="smallbtn" id="tick">1턴 진행</button><button class="smallbtn" id="skip">4턴 진행</button><button class="smallbtn" id="auto">자동 진행</button></div><div class="cliff"><div><strong>클리프</strong><div><span id="cliffValue"></span> · <span id="cliffWhere"></span></div></div><div class="actions" style="grid-template-columns:repeat(2,1fr);min-width:174px"><button id="heroMove" class="warn">이동</button><button id="heroAct" class="warn">공격</button></div></div><p class="cliff-help">거점 선택 → 이동 → 도착 후 공격 · 공격 시 1턴 진행</p><p class="heal-line">자동 회복 · 안전한 아군 지역에서 2턴 대기 후 회복</p>
+<details class="data-panel" id="dataPanel"><summary class="data-panel-summary"><span>CSV 기록 · 밸런스 설정</span><small>3종</small></summary><div class="balance-lab"><div class="csv-title">전투 기록 · 설정 <small id="csvStatus">0턴 기록</small></div>
+<div class="csv-buttons" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+<button id="exportBalanceHistory" type="button">↓ 핵심 성과</button>
+<button id="exportKeyTurns" type="button">↓ 주요 전황</button>
+<button id="exportBalanceConfig" type="button">↓ 핵심 설정</button>
+</div>
+<div class="csv-note"><b>핵심 성과</b> 승패·소요 턴·손실 · <b>주요 전황</b> 점령·피해 발생 턴 · <b>핵심 설정</b> 전투 수치</div>
+<details class="csv-help" id="csvGuide"><summary>CSV 항목 설명 · 실험 비교</summary><div class="csv-help-inner">
+<p><b>CSV 형식</b> · 표 형식 파일. 핵심 성과는 전투 1회당 1행, 주요 전황은 사건이 발생한 턴마다 1행을 기록합니다.</p>
+<p><b>핵심 성과</b> · 승리 여부, 소요 턴, 본진 피해, 지휘 부대 이탈을 비교합니다. 소요 턴은 같은 전장·난이도 기준으로 해석합니다.</p>
+<table class="csv-dictionary"><thead><tr><th>항목</th><th>의미</th></tr></thead><tbody>
+<tr><td><code>result / turns</code></td><td>승리 또는 패배 / 종료할 때까지 진행한 턴</td></tr>
+<tr><td><code>first_capture_turn</code></td><td>아군이 처음으로 거점을 점령한 턴. 초반 진군 속도 확인용</td></tr>
+<tr><td><code>captured_at_end</code></td><td>종료 시 아군이 보유한 9개 거점 수. 적 본진은 세지 않음</td></tr>
+<tr><td><code>enemy_recapture_events</code></td><td>적이 아군 점령 거점을 다시 빼앗은 횟수</td></tr>
+<tr><td><code>hero_actions / hero_damage_dealt</code></td><td>클리프 공격 횟수 / 실제로 깎은 적 HP 합계. 개입 효과를 확인할 때 사용</td></tr>
+<tr><td><code>ally_artillery_shots / ally_artillery_damage_dealt</code></td><td>아군 포격 횟수 / 실제로 깎은 적 HP 합계. 포격 효율 비교용</td></tr>
+<tr><td><code>enemy_artillery_damage_dealt</code></td><td>적 포격으로 아군 병력·거점이 실제로 잃은 HP 합계. 본진 직접 피해와 구분</td></tr>
+<tr><td><code>rest_hp_recovered_total</code></td><td>안전 지역 자동 회복으로 실제 되찾은 HP. 0이면 회복이 일어나지 않음</td></tr>
+<tr><td><code>source</code></td><td><code>ui_controls</code>는 화면 버튼 실행, <code>automated_policy</code>는 테스트 정책 실행. 전자는 사람이 플레이했다는 증거가 아님</td></tr>
+</tbody></table>
+<p style="margin-top:12px"><b>주요 전황</b> · <code>turn</code>은 발생 턴, <code>major_events</code>는 점령·재탈환·측면 침투·본진 피해 등 사건의 종류입니다. <code>base_damage_turn</code>은 해당 턴에 본진이 받은 피해입니다. 일상적인 이동과 작은 HP 변화는 제외합니다.</p>
+<p><b>핵심 설정</b> · <code>parameter</code>는 수치 이름, <code>value</code>는 적용 값, <code>min/max</code>는 허용 범위입니다. <code>ally_attack</code>은 아군 공격력, <code>raider_attack</code>은 제2·3전장의 침투병 공격력, <code>enemyPeriod / enemyChallengePeriod</code>는 각 난이도의 적 증원 주기입니다.</p>
+<div class="csv-tip"><b>실험 비교</b> · <b>전략 비교</b>: 전장·난이도·설정 ID(<code>balance_config_id</code>)를 같게 두고 지휘 방식만 바꿉니다. <b>수치 변경 비교</b>: 전장·난이도·지휘 방식을 같게 두고 설정 ID가 다른 결과를 비교합니다. 이때 각 실험의 설정 CSV도 함께 보관하세요.</div>
+<div class="csv-tip"><b>설정 변경</b> · 현재 선택한 전장·난이도로 <b>핵심 설정</b>을 내려받아 <code>value</code>만 수정하세요. 행을 삭제하거나 열 이름을 바꾸면 불러오지 못할 수 있습니다. 지휘 부대·클리프 HP 100은 고정입니다. 새로고침하면 누적 기록이 사라지므로 먼저 내보내세요.</div>
+<div class="csv-tip"><b>출처</b> · <code>session_id</code>는 판마다 다른 식별자, <code>engine_version</code>은 게임 버전입니다. 모든 수치는 자체 시뮬레이터에서 나온 값으로, 실제 게임 이용자 통계가 아닙니다.</div>
+</div></details>
+<div class="csv-title" style="margin-top:13px">설정 불러오기 <small>지휘 부대·클리프 HP 100</small></div>
+<label for="balanceImport" style="font-size:11px;color:#c0e8dc">설정 CSV 선택 · value 열 수정 · 적용 시 전투 재시작</label>
+<input class="balance-file" id="balanceImport" type="file" accept=".csv,text/csv" aria-label="편집한 밸런스 설정 CSV 선택">
+<div id="balanceImportStatus" class="balance-status" role="status" aria-live="polite">설정 CSV의 <b>value</b> 열만 수정하세요. 실험별 설정 ID는 결과 CSV에 기록됩니다.</div>
+<p class="balance-note"><span class="balance-warning">새로고침하면 기록이 사라집니다. 종료 후 CSV를 저장하세요.</span></p></div></details>
+<div id="result" class="endcard" role="status"></div><h2 style="margin-top:15px">전황 기록 <small>최신 순</small></h2><div class="log" id="log" role="log" aria-label="턴별 전황 기록" aria-live="off"></div></section></div>
+<details class="rules-details"><summary>전술 규칙</summary><div class="rules-grid"><div><b>부대 명령</b>진격: 경로상의 적과 교전하며 이동 · 우선이동: 공격하지 않고 이동을 우선하지만 공격받을 수 있음</div><div><b>거점 효과</b>일반 거점: 병력 생산 · 요새 거점: 점령 세력 공격력 강화 · 병기 거점: 적 거점 포격 지원</div><div><b>전선·재출격</b>직전 전선 거점 1곳을 점령해야 다음 전선으로 진입할 수 있습니다. 제3전선 전체 확보 후 적 본진 공략 가능. 전멸한 부대는 3턴 후 재출격합니다.</div><div><b>자동 회복·기록</b>안전한 아군 지역에서 2턴 대기 후 자동 회복. CSV는 핵심 성과·주요 전황·핵심 설정 3종을 제공합니다.</div></div></details><p class="disclaimer">기획서 기반 비공식 게임 시스템 검증용 프로토타입입니다. 전투 수치와 CSV는 자체 시뮬레이션 결과이며, 실제 붉은사막 플레이어 데이터가 아닙니다.</p>
+<div id="tutorialBackdrop" aria-hidden="true"></div>
+<aside id="tutorialCard" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" aria-describedby="tutorialLead">
+  <div class="tutorial-head">
+    <div><span class="tutorial-eyebrow">조작 가이드</span><h2 id="tutorialTitle">사용 방법</h2></div>
+    <button type="button" id="tutorialClose" class="tutorial-close" aria-label="사용 방법 닫기">×</button>
+  </div>
+  <p id="tutorialLead">항목을 선택하면 실제 화면에서 조작을 진행합니다. 실습 중 명령은 전투에 반영됩니다.</p>
+  <div id="lessonMenu" class="lesson-menu">
+    <button class="lesson-card" type="button" data-lesson="basic"><span class="lesson-number">01</span><strong>부대 지휘</strong><span>경로 지정 · 진격</span></button>
+    <button class="lesson-card" type="button" data-lesson="cliff"><span class="lesson-number">02</span><strong>클리프</strong><span>이동 · 직접 공격</span></button>
+    <button class="lesson-card" type="button" data-lesson="rush"><span class="lesson-number">03</span><strong>우선이동</strong><span>교전 없이 이동</span></button>
+    <button class="lesson-card" type="button" data-lesson="rules"><span class="lesson-number">04</span><strong>전장 규칙</strong><span>거점 · 회복 · CSV</span></button>
+  </div>
+  <div id="lessonInfo" class="lesson-info" hidden>
+    <div class="lesson-info-top"><button type="button" id="lessonBack">← 목록</button><span id="lessonInfoTag">안내</span></div>
+    <h3 id="lessonInfoTitle"></h3>
+    <p id="lessonInfoText"></p>
+    <div id="lessonInfoBody"></div>
+    <button type="button" id="lessonLaunch" class="lesson-launch">실습 시작</button>
+  </div>
+  <div class="tutorial-actions"><button type="button" id="tutorialSkip">바로 플레이</button></div>
+  <p class="tutorial-reopen-note">게임 중에도 <b>사용 방법</b>에서 다시 볼 수 있습니다.</p>
+</aside>
+<aside id="practiceCoach" hidden role="region" aria-label="조작 실습 안내" aria-live="polite">
+  <div class="practice-top"><span id="practiceCount">1 / 5</span><span class="practice-subtitle">조작 실습</span></div>
+  <div id="practiceTrack" class="practice-step-track" aria-hidden="true"></div>
+  <strong id="practiceTitle">기본 지휘</strong>
+  <p id="practiceDetail">노란색 표시 항목 선택</p>
+  <p id="practiceHint" class="practice-hint" aria-live="polite"></p>
+  <div class="practice-buttons"><button id="practiceFind" type="button">대상 위치</button><button id="practiceNext" type="button" hidden>다음 항목</button><button id="practiceExit" type="button">실습 종료</button></div>
+</aside>
+</main><script>
+'use strict';
+// 독립 실행형 게임 기획 규칙 프로토타입. 수치는 실험용이며 실제 붉은사막 자료가 아님.
+// v10 기반 · v12 중앙 병기 및 플레이 로그 강화: 전장 순서에 따른 거점 방어력/정예 전력, 최종 적 본진 방어를 단계적으로 강화.
+// 도전 난이도의 과도한 적 강화는 정상 전략을 붕괴시키므로, 2전장의 증원 주기와 3전장의 증원병 내구도만 제한적으로 조정.
+// 지도 UI/경로 표시/버튼 조작/전선 개방 등 원 기획 규칙은 유지.
+const DEFS=[
+ {id:'N1',r:0,c:1,type:'general',name:'북부 보급로',hp:32},
+ {id:'C1',r:1,c:1,type:'fort',name:'전초 요새',hp:42},
+ {id:'S1',r:2,c:1,type:'general',name:'남부 통로',hp:32},
+ {id:'N2',r:0,c:2,type:'fort',name:'북부 성채',hp:46,elite:22},
+ {id:'C2',r:1,c:2,type:'general',name:'중앙 집결지',hp:37},
+ {id:'S2',r:2,c:2,type:'general',name:'남부 병참로',hp:34},
+ {id:'N3',r:0,c:3,type:'general',name:'북부 성문',hp:43},
+ {id:'C3',r:1,c:3,type:'siege',name:'중앙 포격 진지',hp:44,facility:23},
+ {id:'S3',r:2,c:3,type:'general',name:'남부 공성로',hp:44,elite:20},
+ {id:'HQ',r:1,c:4,type:'hq',name:'적 본진',hp:85,elite:28}
+];
+const SCENARIOS=[
+ // 테스트 값: 초반은 조작 적응, 중후반은 전선 공방이 중요하도록 단계별 증원/길목을 설정.
+ {title:'제1전장 · 국경 돌파',scale:1.16,enemyPeriod:5,spawnLimit:9,base:160,delay:9,bridge:[0,1,2,3],description:'8방향 기동 가능 · 일반 거점과 중앙 요새를 활용하는 전장'},
+ {title:'제2전장 · 요새 공방',scale:1.22,enemyPeriod:6,spawnLimit:9,base:150,delay:8,bridge:[0,2,3],description:'제1전선 횡단로 단절 · 대각 우회로를 이용해 북부 성채를 압박하는 전장'},
+ {title:'제3전장 · 최후 대공세',scale:1.23,enemyPeriod:6,spawnLimit:10,base:150,delay:8,bridge:[0,1,3],description:'제2전선 횡단로 단절 · 제3전선의 중앙 병기 확보 후 적 본진 공략을 지원하는 전장'}
+];
+const REGION_STRENGTH=[
+ {C1:1.00,N2:1.03,C2:1.02,S2:.96,C3:1.06,S3:1.02,HQ:1.02},
+ {N1:.96,S1:.98,C1:1.10,N2:1.11,C2:1.04,S2:.94,N3:.97,C3:1.13,S3:1.01,HQ:1.03},
+ {N1:.94,C1:1.02,S1:.95,N2:1.11,C2:1.14,S2:1.00,N3:1.00,C3:1.08,S3:1.18,HQ:1.08}
+];
+const TYPE_LABEL={general:'일반',fort:'요새',siege:'병기',hq:'적 본진',home:'아군 출격지'};
+const LANE=['북부','중앙','남부'];
+const POS=(r,c)=>({x:10+c*20,y:22+r*28});
+// 회색갈기와 클리프는 인접한 칸으로 8방향 이동한다. 적 AI는 기존 진군로를 우선 사용한다.
+// 직전 전선 1거점 확보와 최종 본진의 제3전선 전면 확보 조건은 우회할 수 없다.
+// 지도에 연결선 전체를 그리지 않고 선택된 부대의 실제 경로만 표시한다.
+const diagonalPassage=(a,b)=>Math.abs(a.r-b.r)===1&&Math.abs(a.c-b.c)===1;
+const ENEMY_DIAGONAL=[
+  [[0,0,1,1],[2,0,1,1],[0,1,1,2],[1,1,2,2],[0,2,1,3],[1,2,2,3]],
+  [[0,0,1,1],[2,0,1,1],[0,1,1,2],[1,1,0,2],[2,1,1,2],[1,2,2,3]],
+  [[0,0,1,1],[2,0,1,1],[1,1,0,2],[1,1,2,2],[0,2,1,3],[2,2,1,3]]
+];
+const enemyDiagonalPassage=(a,b)=>ENEMY_DIAGONAL[S.stage].some(([r,c,rr,cc])=>(a.r===r&&a.c===c&&b.r===rr&&b.c===cc)||(b.r===r&&b.c===c&&a.r===rr&&a.c===cc));
+
+const eq=(a,b)=>a && b && a.r===b.r&&a.c===b.c;
+const dist=(a,b)=>Math.abs(a.r-b.r)+Math.abs(a.c-b.c);
+const cap=(v,l,h)=>Math.max(l,Math.min(h,v));
+const $ = (id)=>document.getElementById(id);
+const rect=(r,c)=>({r,c});
+let S=null,timer=null,ids=0,HISTORY=[];
+const ENGINE_VERSION='v24.21-final'; // 기획 검증 시뮬레이터 규칙·밸런스 버전. CSV와 동일.
+// 시뮬레이터 고유 시험 밸런스. 기획서의 거점/명령/전선 규칙과 분리한다.
+const NODE_MUL=Array.from({length:3},()=>Object.fromEntries(DEFS.map(n=>[n.id,1])));
+// v17: 기존 3전선/9거점으로 복원. 과도한 전체 증원 대신 두 핵심 거점 방어만 소폭 보정.
+NODE_MUL[1].N2=1.05; // 제2전장 북부 요새, 기존 대비 방어력/주둔병 +5%
+NODE_MUL[2].HQ=1.18; // 제3전장 적 본진, 기존 대비 방어력/주둔병 +18%
+
+const BAL={ally_attack:20,hero_attack:30,fort_bonus_per_fort:3,ally_production_interval:5,enemy_production_interval:9,ally_artillery_damage:24,ally_artillery_hq_damage:58,enemy_artillery_damage:6,raider_attack:8,stage3_challenge_wave_hp_multiplier:1.15,ally_soldier_cap:13,rest_delay_turns:2,rest_heal_base:5,rest_heal_bonus:3};
+const BAL_FIELDS=[
+ {scope:'global',stage:'all',key:'ally_attack',desc:'회색갈기 지휘 부대 공격력',min:4,max:40,integer:true},
+ {scope:'global',stage:'all',key:'hero_attack',desc:'클리프 직접 전투 공격력',min:10,max:70,integer:true},
+ {scope:'global',stage:'all',key:'fort_bonus_per_fort',desc:'요새 1곳 당 해당 세력 공격 보너스',min:0,max:8,integer:true},
+ {scope:'global',stage:'all',key:'ally_production_interval',desc:'아군 일반 거점 일반병 생산 간격(턴)',min:2,max:14,integer:true},
+ {scope:'global',stage:'all',key:'enemy_production_interval',desc:'적 일반 거점 일반병 생산 간격(턴)',min:3,max:18,integer:true},
+ {scope:'global',stage:'all',key:'ally_artillery_damage',desc:'아군 병기 일반 거점 포격력',min:0,max:80,integer:true},
+ {scope:'global',stage:'all',key:'ally_artillery_hq_damage',desc:'아군 병기 적 본진 포격력',min:0,max:110,integer:true},
+ {scope:'global',stage:'all',key:'enemy_artillery_damage',desc:'적 병기 포격력',min:0,max:35,integer:true},
+ {scope:'global',stage:'all',key:'raider_attack',desc:'측면 침투병 실제 공격력 (제2·3전장)',min:6,max:20,integer:true},
+ {scope:'global',stage:'all',key:'stage3_challenge_wave_hp_multiplier',desc:'제3전장 도전 난이도 후반 적 증원 HP 배율',min:1,max:1.5},
+ {scope:'global',stage:'all',key:'ally_soldier_cap',desc:'아군 기동 일반병 최대 수',min:4,max:25,integer:true},
+ {scope:'global',stage:'all',key:'rest_delay_turns',desc:'안전 지역에서 대기 후 회복 시작까지 필요한 턴 수',min:1,max:5,integer:true},
+ {scope:'global',stage:'all',key:'rest_heal_base',desc:'회색갈기 지휘 부대 휴식 시 턴당 기본 회복량',min:0,max:12,integer:true},
+ {scope:'global',stage:'all',key:'rest_heal_bonus',desc:'출격지/아군 일반 거점 휴식 추가 회복량',min:0,max:8,integer:true},
+ ...[1,2,3].flatMap(stage=>[
+  {scope:'stage',stage,key:'scale',desc:'전장 적 거점/수비 병력 규모 배율',min:.70,max:2.5},
+  {scope:'stage',stage,key:'enemyPeriod',desc:'표준 난이도 적 증원 간격(턴)',min:3,max:14,integer:true},
+  {scope:'stage',stage,key:'enemyChallengePeriod',desc:'도전 난이도 적 증원 간격(턴)',min:3,max:14,integer:true},
+  {scope:'stage',stage,key:'spawnLimit',desc:'적 기동 일반병 최대 수',min:4,max:24,integer:true},
+  {scope:'stage',stage,key:'base',desc:'회색갈기 본진 HP',min:60,max:350,integer:true}
+ ]),
+ ...[1,2,3].flatMap(stage=>DEFS.map(n=>({scope:'node',stage,key:n.id,desc:n.name+' · 해당 전장 방어력/수비병 배율',min:.5,max:2.0})))
+];
+// HP100 고정: 회색갈기 지휘 3부대 및 클리프는 설정 CSV로 변경되지 않는다.
+SCENARIOS[0].enemyChallengePeriod=SCENARIOS[0].enemyPeriod;
+SCENARIOS[1].enemyChallengePeriod=5;
+SCENARIOS[2].enemyChallengePeriod=5;
+function getBalanceValue(f){return f.scope==='global'?BAL[f.key]:f.scope==='node'?NODE_MUL[f.stage-1][f.key]:SCENARIOS[f.stage-1][f.key]}
+function balanceFingerprint(){return BAL_FIELDS.map(f=>`${f.scope==='global'?'G':f.stage}${f.key}:${getBalanceValue(f)}`).join('|')}
+function configHash(){let h=2166136261;for(const c of balanceFingerprint())h=Math.imul(h^c.charCodeAt(0),16777619);return 'CFG-'+(h>>>0).toString(16).padStart(8,'0')}
+
+function nAt(r,c){return S.nodes.find(n=>n.r===r&&n.c===c)}
+// 왼쪽 3개 아군 출격지는 일반 점령 거점은 아니지만, 이동·주둔을 위한 선택 가능한 경유지다.
+// 적군에게 점령되는 일반 거점과 구분해 전선 개방 및 9개 거점 점령 수에는 포함하지 않는다.
+function nId(id){
+ const found=S.nodes.find(n=>n.id===id);
+ if(found)return found;
+ const match=/^HOME_([0-2])$/.exec(String(id));
+ if(!match)return null;
+ const r=Number(match[1]);
+ return {id,r,c:0,type:'home',name:LANE[r]+' 출격지',owner:'ally',hp:S.baseHp,max:S.baseMax,elite:0,facility:0};
+}
+function countOwned(c,side='ally'){return S.nodes.filter(n=>n.c===c&&n.owner===side).length}
+function unlocked(c){return c<=1||(c===2&&countOwned(1)>0)||(c===3&&countOwned(2)>0)||(c===4&&countOwned(3)===3)}
+function fortBonus(side){return S.nodes.filter(n=>n.owner===side&&n.type==='fort').length*BAL.fort_bonus_per_fort}
+function roadAllows(a,b){
+ const dr=Math.abs(a.r-b.r),dc=Math.abs(a.c-b.c);
+ if(dr>1||dc>1||(!dr&&!dc))return false;
+ if(dr&&dc)return diagonalPassage(a,b);
+ if(dr)return SCENARIOS[S.stage].bridge.includes(a.c);
+ return true;
+}
+function isOver(){return S.result!==''}
+function nameAt(r,c){return c===0?LANE[r]+' 출격지':c===4?(r===1?'적 본진':LANE[r]+' 증원로'):(nAt(r,c)?.name||'무명 거점')}
+function allAt(side,r,c){return S.units.filter(u=>u.side===side&&u.hp>0&&u.cool===0&&u.r===r&&u.c===c)}
+function log(text,type=''){
+ S.log.unshift({t:S.turn,text,type});S.log=S.log.slice(0,90);
+ if(S.eventLog)S.eventLog.push({turn:S.turn,event_index:S.eventLog.length+1,severity:type||'info',detail:text});
+}
+function recordFrame(){
+ if(!S||!S.turnFrames)return;
+ // 같은 턴에 클리어가 발생하면 이전 스냅샷을 최신 상태로 갱신합니다.
+ if(S.turnFrames.length&&S.turnFrames[S.turnFrames.length-1].turn===S.turn){
+  S.turnFrames.pop();
+  S.nodeFrames.splice(-S.nodes.length);
+  while(S.unitFrames.length&&S.unitFrames[S.unitFrames.length-1].turn===S.turn)S.unitFrames.pop();
+ }
+ const shared={session_id:S.sessionId,source:S.recordSource,engine_version:ENGINE_VERSION,balance_config_id:S.config_id,stage:S.stage+1,stage_name:SCENARIOS[S.stage].title,difficulty:S.difficulty,turn:S.turn};
+ const owned=S.nodes.filter(n=>n.c<=3&&n.owner==='ally');
+ const prev=S.turnFrames[S.turnFrames.length-1]||null;
+ const hpUnits=S.units.filter(u=>u.side==='ally'&&u.kind==='leader');
+ const leaderHp=hpUnits.map(u=>u.hp);
+ S.turnFrames.push({...shared,result:S.result||'ongoing',base_hp_change_turn:prev?S.baseHp-prev.base_hp:0,owned_change_turn:prev?owned.length-prev.owned_total:0,ally_knockouts_new_turn:prev?S.deadCount-prev.ally_knockouts:0,ally_leader_hp_total:leaderHp.reduce((a,b)=>a+b,0),ally_leader_hp_min:Math.min(...leaderHp),base_hp:S.baseHp,base_hp_max:S.baseMax,owned_total:owned.length,owned_general:owned.filter(n=>n.type==='general').length,owned_fort:owned.filter(n=>n.type==='fort').length,owned_siege:owned.filter(n=>n.type==='siege').length,enemy_wave:S.wave,hero_r:S.hero.r,hero_c:S.hero.c,hero_hp:S.hero.hp,hero_hp_max:S.hero.max,hero_cool:S.hero.cool,hero_actions:S.heroCount,ally_leaders_active:S.units.filter(u=>u.side==='ally'&&u.kind==='leader'&&u.hp>0&&u.cool===0).length,ally_soldiers:S.units.filter(u=>u.side==='ally'&&u.kind==='soldier'&&u.hp>0).length,enemy_soldiers:S.units.filter(u=>u.side==='enemy'&&u.kind==='soldier'&&u.hp>0).length,ally_knockouts:S.deadCount,enemy_unit_kills:S.enemyKills,resting_leaders:S.units.filter(u=>u.side==='ally'&&u.kind==='leader'&&u.restTurns>0&&u.cool===0).length,rest_hp_recovered_turn:S.healingThisTurn||0,rest_hp_recovered_total:S.restHealingTotal||0});
+ for(const n of S.nodes){
+  const guard=S.units.filter(u=>u.kind==='guard'&&u.hp>0&&u.r===n.r&&u.c===n.c&&u.side===n.owner);
+  S.nodeFrames.push({...shared,node_id:n.id,node_name:n.name,node_type:n.type,row:n.r,col:n.c,owner:n.owner,hp:n.hp,hp_max:n.max,elite_hp:n.elite,facility_hp:n.facility,garrison_count:guard.length,garrison_hp:guard.reduce((s,u)=>s+u.hp,0),ally_present:allAt('ally',n.r,n.c).length,enemy_present:allAt('enemy',n.r,n.c).length});
+ }
+ for(const u of S.units){
+  S.unitFrames.push({...shared,unit_id:u.id,unit_name:u.name,side:u.side,kind:u.kind,row:u.r,col:u.c,hp:u.hp,hp_max:u.max,respawn_cooldown:u.cool||0,command:u.cmd||'',remaining_waypoints:(u.path||[]).map(p=>`${p.r}:${p.c}`).join('>')});
+ }
+ S.unitFrames.push({...shared,unit_id:'CLIFF',unit_name:'클리프',side:'ally',kind:'hero',row:S.hero.r,col:S.hero.c,hp:S.hero.hp,hp_max:S.hero.max,respawn_cooldown:S.hero.cool,command:S.hero.target?'move':'idle',remaining_waypoints:S.hero.target?`${S.hero.target.r}:${S.hero.target.c}`:''});
+}
+function stopAuto(){if(timer)clearInterval(timer);timer=null;if($('auto'))$('auto').textContent='자동 진행'}
+function setUp(stage=0,difficulty='standard',preserveCampaign=false){
+ if(S&&S.turn>0)archiveSession();
+ stopAuto();ids=0;let cfg=SCENARIOS[stage],hard=difficulty==='challenge'?[1.12,1.065,1.08][stage]:1,scale=cfg.scale*hard*1.35*[1.20,1.25,1.37][stage];
+ const prev=preserveCampaign&&S?S.campaign:{turns:0,hero:0,losses:0,cleared:[],best:[]};
+ const sessionId='GM-'+new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14)+'-'+Math.random().toString(36).slice(2,8);
+ S={sessionId,config_id:configHash(),tuningSnapshot:{ally_attack:BAL.ally_attack,hero_attack:BAL.hero_attack,raider_attack:BAL.raider_attack,stage_enemy_scale:cfg.scale,enemy_wave_interval:enemyWavePeriod(stage,difficulty),rest_delay_turns:BAL.rest_delay_turns,rest_heal_base:BAL.rest_heal_base,rest_heal_bonus:BAL.rest_heal_bonus,late_wave_hp_multiplier:(stage===2&&difficulty==='challenge'?BAL.stage3_challenge_wave_hp_multiplier:1),node_defense_multiplier_mean:Math.round((Object.values(NODE_MUL[stage]).reduce((a,b)=>a+b,0)/Object.values(NODE_MUL[stage]).length)*100)/100},recordSource:'ui_controls',eventLog:[],turnFrames:[],nodeFrames:[],unitFrames:[],stage,difficulty,campaign:prev,turn:0,wave:1,baseMax:cfg.base,baseHp:cfg.base,win:false,result:'',events:[],selectedUnit:'A1',selectedId:'N1',heroCount:0,heroDamageDealt:0,allyArtilleryDamageDealt:0,enemyArtilleryDamageDealt:0,deadCount:0,enemyKills:0,raiderCount:0,idling:0,healingThisTurn:0,restHealingTotal:0,
+  nodes:DEFS.map(n=>{const strength=(REGION_STRENGTH[stage][n.id]||1)*NODE_MUL[stage][n.id];const hqFactor=n.id==='HQ'?[1,1.8,4.0][stage]*(stage===2&&difficulty==='challenge'?1.20:1):1;const openingFortFactor=(stage===0&&n.id==='N2')?1.10:1;const h=Math.round(n.hp*scale*strength*hqFactor*openingFortFactor),e=Math.round((n.elite||0)*scale*strength),f=Math.round((n.facility||0)*scale*strength);return {...n,owner:'enemy',max:h,hp:h,eliteMax:e,elite:e,facilityMax:f,facility:f}}),
+  units:[],hero:{r:1,c:0,hp:100,max:100,cool:0,target:null},log:[]};
+ for(let r=0;r<3;r++)S.units.push({id:'A'+(r+1),side:'ally',kind:'leader',name:'회색갈기 '+(r+1)+'부대',r,c:0,home:r,hp:100,max:100,atk:BAL.ally_attack,cool:0,cmd:'hold',path:[],restTurns:0,totalRestTurns:0,restHealedTotal:0,movedThisTurn:false,foughtThisTurn:false});
+ for(const n of S.nodes){addUnit('enemy','guard',n.r,n.c,{hp:Math.round((n.type==='hq'?29:n.type==='fort'?18:13)*scale*(REGION_STRENGTH[stage][n.id]||1)*NODE_MUL[stage][n.id]),atk:n.type==='fort'?6:5})}
+ addUnit('enemy','soldier',0,3,{hp:30,atk:9});
+ addUnit('enemy','soldier',2,3,{hp:30,atk:9});
+ addUnit('enemy','soldier',1,2,{hp:26,atk:8});
+ log(SCENARIOS[stage].title+' 작전 시작','good');
+ log('통로 상태: 상하 이동 '+(cfg.bridge.length===4?'전면 개방':('제'+(cfg.bridge.includes(1)?2:1)+'전선 일부 차단'))+'. 대각선 우회 가능','warn');
+ log('아군 이동: 8방향 · 적 이동: 지정 진군로','warn');
+ $('stageSelect').value=String(stage);$('difficultySelect').value=difficulty;
+ recordFrame();draw(true);
+}
+function addUnit(side,kind,r,c,opts={}){
+ const id=side==='ally'?'F'+(++ids):'E'+(++ids);
+ const hp=opts.hp|| (side==='ally'?26:25);
+ const u={id,side,kind,name:side==='ally'?(kind==='guard'?'회색갈기 주둔 경비대':'회색갈기 일반병'):(kind==='guard'?'발더 주둔군':'발더 일반병'),r,c,hp,max:hp,atk:opts.atk||7,cool:0,cmd:side==='ally'?'auto':'invasion',path:[]};
+ S.units.push(u);return u
+}
+function prune(){S.units=S.units.filter(u=>u.kind==='leader'||(u.hp>0&&u.cool===0))}
+function currentNode(side,r,c){let n=nAt(r,c);return n&&n.owner===side?n:null}
+function routeFind(from,target,side,mode='advance',previewLocked=false){
+ if(eq(from,target))return [];
+ let Q=[from],seen=new Set([from.r+','+from.c]),prior=new Map();
+ while(Q.length){
+  let p=Q.shift(),dirs=[[0,1],[-1,0],[1,0],[0,-1],[-1,1],[1,1],[-1,-1],[1,-1]];
+  dirs.sort((a,b)=>dist(rect(p.r+a[0],p.c+a[1]),target)-dist(rect(p.r+b[0],p.c+b[1]),target));
+  for(const [dr,dc] of dirs){
+   const r=p.r+dr,c=p.c+dc,key=r+','+c;
+   if(r<0||r>2||c<0||c>4||seen.has(key)||!roadAllows(p,rect(r,c)))continue;
+   // 적 AI는 이전 버전의 안정화된 대각 진군로만 사용해 증원 속도의 급격한 변화를 방지한다.
+   if(side==='enemy'&&dr&&dc&&!enemyDiagonalPassage(p,rect(r,c)))continue;
+   // 아군은 지도에 존재하지 않는 후방 증원 칸(4열 북부/남부)에 진입하지 않는다.
+   if(c===4&&r!==1&&side==='ally')continue;
+   // 우선이동도 적 점령 거점을 경유할 수 있지만 전선 개방 조건은 동일하게 적용한다.
+   if(side==='ally'&&!unlocked(c)&&!previewLocked && nAt(r,c)?.owner!=='ally')continue;
+   if(c===4&&r!==1&&side==='enemy'&&target.c!==4)continue;
+   seen.add(key);prior.set(key,p.r+','+p.c);
+   if(r===target.r&&c===target.c){
+    const path=[];let t=key;
+    while(t!==from.r+','+from.c){const [a,b]=t.split(',').map(Number);path.unshift(rect(a,b));t=prior.get(t)}
+    return path;
+   }
+   Q.push(rect(r,c));
+  }
+ }
+ return null;
+}
+// 목표가 잠겨 있어도 현재 열린 전선에서 이동 가능한 경로를 먼저 실행한다.
+// 잠긴 칸은 넘지 않고, 전선이 열리면 같은 최종 목표로 경로를 다시 탐색한다.
+function routeTowardGoal(from,target,side='ally',mode='advance'){
+ const direct=routeFind(from,target,side,mode);
+ if(direct!==null)return {path:direct,pending:false,remaining:[]};
+ if(side!=='ally')return {path:null,pending:false,remaining:[]};
+ const future=routeFind(from,target,side,mode,true);
+ if(future===null)return {path:null,pending:false,remaining:[]};
+ const path=[];
+ for(const p of future){
+  if(!unlocked(p.c)&&nAt(p.r,p.c)?.owner!=='ally')break;
+  path.push(p);
+ }
+ return {path,pending:path.length<future.length,remaining:future.slice(path.length)};
+}
+
+function directPaths(unit,type){
+ if(type==='hold'){unit.cmd='hold';unit.path=[];unit.frontierWaiting=null;log(unit.name+' 현재 위치 주둔','good');draw();return}
+ if(type==='retreat'){unit.cmd='retreat';unit.path=[rect(unit.home,0)];log(unit.name+' 본진 복귀 명령','good');draw();return}
+ // 경로 선택 버튼으로 미리 등록한 경로를 진격/우선이동에 적용한다.
+ // 기존 명령의 모드만 바꿔도 경로가 사라지지 않는다.
+ if(!unit.path.length){log('경로 미등록 · 거점 선택 후 [경로 선택]','bad');draw();return}
+ if(unit.path.some(p=>p.c===4&&!unlocked(4))){
+   // 마지막 전선 3개를 확보하기 전에도 '예약'은 가능하며, 실제 이동은 전선이 열릴 때 진행한다.
+   log('적 본진 지정 · 현재 진입 가능한 전선까지 이동하고, 제3전선 전체 확보 후 본진에 진입합니다.','warn');
+ }
+ unit.cmd=type;
+ log(unit.name+' '+(type==='rush'?'우선이동':'진격')+' 명령 설정: '+unit.path.map(p=>nameAt(p.r,p.c)).join(' → '),'good');draw();
+}
+function command(type){if(isOver())return;let u=S.units.find(u=>u.id===S.selectedUnit);if(!u||u.cool>0){log('이 부대는 재출격 대기 중입니다.','bad');draw();return}directPaths(u,type)}
+function addWaypoint(){
+ if(isOver())return;
+ const n=nId(S.selectedId),u=S.units.find(x=>x.id===S.selectedUnit);
+ if(!n){log('목적지 미선택','bad');draw();return}
+ const p=rect(n.r,n.c);
+ if(!u||u.cool>0){log('재출격 대기 중인 부대는 경로를 수정할 수 없습니다.','bad');draw();return}
+ if(u.path.length>=8){log('경유지 등록 한도: 8개','warn');draw();return}
+ if(u.path.length && eq(u.path[u.path.length-1],p)){log('마지막 경유지와 동일한 거점','warn');draw();return}
+ if(!u.path.length && eq(u,p)){log(u.name+'은(는) 이미 '+n.name+'에 있습니다. 다른 목적지를 선택하세요.','warn');draw();return}
+ // 명령 전에 등록한 경로도 부대별로 저장한다. 다른 부대를 선택해도 경로가 섞이지 않는다.
+ u.path.push(p);u.frontierWaiting=null;
+ const suffix=['advance','rush'].includes(u.cmd)?' (실행 중인 명령 뒤에 연결됨)':' (명령 대기)';
+ log(u.name+' 경로 선택: '+n.name+suffix,'good');draw();
+}
+function clearWaypoint(){
+ if(isOver())return;
+ const u=S.units.find(x=>x.id===S.selectedUnit);if(!u)return;
+ u.path=[];u.cmd='hold';u.frontierWaiting=null;
+ log(u.name+' 경로 초기화 · 현 위치 대기','good');draw();
+}
+
+function knockOut(u){u.restTurns=0;u.hp=0;u.cool=3;u.cmd='hold';u.path=[];S.deadCount++;log(u.name+' 전투 이탈. 3턴 후 본진에서 재출격합니다.','bad')}
+function moveLeader(u){
+ if(u.cool>0){u.cool--;if(u.cool===0){u.hp=u.max;u.r=u.home;u.c=0;u.cmd='hold';u.path=[];u.restTurns=0;log(u.name+'이(가) 본진에서 재출격했습니다.','good')}return}
+ if(u.cmd==='hold'||!u.path.length)return;
+ while(u.path.length&&eq(u,u.path[0]))u.path.shift();
+ if(!u.path.length){
+  if(u.cmd!=='rush'||!nAt(u.r,u.c)||nAt(u.r,u.c).owner==='ally')u.cmd='hold';
+  log(u.name+' 경로 종료'+(u.cmd==='rush'?' (우선이동, 공격 안 함)':' (주둔)')+'.','good');return;
+ }
+ const local=nAt(u.r,u.c),foes=allAt('enemy',u.r,u.c);
+ // 진격은 맞닥뜨린 적과 교전해 제압한 뒤 이동을 재개한다.
+ if(u.cmd==='advance'&&(foes.length||(local&&local.owner==='enemy')))return;
+ let goal=u.path[0],route=routeTowardGoal(u,goal,'ally',u.cmd).path;
+ if(route===null){log(u.name+' 이동 가능한 경로 없음','warn');return}
+ if(!route.length){
+  // 이미 이동 가능한 최전방에 도착: 경유지는 유지하고 개방까지 대기한다.
+  if(!u.frontierWaiting || !eq(u.frontierWaiting,goal)){
+   log(u.name+' 전선 개방 대기 · 현재 위치 '+nameAt(u.r,u.c),'warn');
+   u.frontierWaiting=rect(goal.r,goal.c);
+  }
+  return;
+ }
+ u.frontierWaiting=null;
+ // 기획서에서 우선이동의 두 칸 속도 상승은 명시하지 않았으므로 이동 속도는 진격과 동일한 1칸이다.
+ let tile=route[0];u.r=tile.r;u.c=tile.c;u.movedThisTurn=true;u.restTurns=0;
+ log(u.name+' 이동 → '+nameAt(u.r,u.c)+(u.cmd==='rush'?' (우선이동, 교전 회피)':''));
+ while(u.path.length&&eq(u,u.path[0]))u.path.shift();
+ if(!u.path.length){
+  if(u.cmd!=='rush'||!nAt(u.r,u.c)||nAt(u.r,u.c).owner==='ally')u.cmd='hold';
+  log(u.name+'이(가) 최종 목표에 도착해 머뭅니다.'+(u.cmd==='rush'?' 교전 없이 대기합니다.':''),'good');
+ }
+}
+
+// 일반병도 같은 8방향 길 찾기를 사용한다. 전황에 따라 다른 전선으로 기동할 수 있음.
+function routeToPriority(u,candidates,side){
+ let routes=[];
+ for(const obj of candidates){
+  if(eq(u,obj))continue;
+  let path=routeFind(u,obj,side);
+  if(path&&path.length)routes.push({obj,path,score:path.length+(obj.r===u.r?0:.7)});
+ }
+ routes.sort((a,b)=>a.score-b.score||Math.abs(a.obj.r-u.r)-Math.abs(b.obj.r-u.r));
+ return routes[0]||null;
+}
+function enemyMove(u){
+ if(u.hp<=0)return;
+ const local=nAt(u.r,u.c);
+ if(allAt('ally',u.r,u.c).length||(local&&local.owner==='ally'))return;
+ if(u.c===0)return;
+ // 측면 침투병은 전선 점령지보다 본진 출격지를 목표로 삼는다. 실제 인접 칸을 이동하며 교전·저지 가능.
+ if(u.raider){
+  const home=rect(u.raidLane,0);
+  const path=routeFind(u,home,'enemy');
+  if(path&&path.length){u.r=path[0].r;u.c=path[0].c;}
+  return;
+ }
+ if(u.c===1&&S.turn<SCENARIOS[S.stage].delay)return;
+ // 인접한 아군 점령 거점을 우선 압박하고, 비어 있으면 아군 출격지로 진군. 대각 기동 허용.
+ // 따라서 북→중앙, 중앙→남부 등 적군의 측면 이동·우회 침공이 발생한다.
+ const held=S.nodes.filter(n=>n.owner==='ally'&&n.c<=u.c&&n.c>=1);
+ const reachable=routeToPriority(u,held,'enemy');
+ let path=reachable?.path;
+ if(!path){
+  const spawns=[0,1,2].map(r=>rect(r,0));
+  const target=routeToPriority(u,spawns,'enemy');path=target?.path;
+ }
+ if(path&&path.length){const next=path[0];u.r=next.r;u.c=next.c;}
+}
+function autoSoldierMove(u){
+ if(u.hp<=0)return;
+ const local=nAt(u.r,u.c);
+ if(allAt('enemy',u.r,u.c).length||(local&&local.owner==='enemy'))return;
+ // 일반 거점에서 생산된 병력도 주변의 적 거점으로 상하·대각 기동.
+ const targets=S.nodes.filter(n=>n.owner==='enemy'&&n.c>=u.c&&unlocked(n.c));
+ const choice=routeToPriority(u,targets,'ally');
+ if(choice&&choice.path.length){const next=choice.path[0];u.r=next.r;u.c=next.c;}
+}
+function heroMovement(){
+ let h=S.hero;
+ if(h.cool>0){h.cool--;if(h.cool===0){h.hp=h.max;h.r=1;h.c=0;h.target=null;log('클리프가 본진에서 재출격했습니다.','good')}return}
+ if(!h.target||eq(h,h.target)){h.target=null;return}
+ let path=routeTowardGoal(h,h.target,'ally','advance').path;if(path&&path.length){let p=path[0];h.r=p.r;h.c=p.c;log('클리프 이동 → '+nameAt(h.r,h.c))}
+ if(eq(h,h.target))h.target=null
+}
+function focusDamage(units,dmg,attackerSide){
+ // 전투 타깃은 일반병부터 소진, 지휘 부대가 최후에 남아 재출격을 유도한다.
+ const targets=[...units].sort((a,b)=>(a.kind==='leader'?1:0)-(b.kind==='leader'?1:0)||a.hp-b.hp);
+ let remain=dmg,applied=0;for(const u of targets){let taken=Math.min(u.hp,remain);u.hp-=taken;remain-=taken;applied+=taken;if(u.hp<=0){if(u.kind==='leader')knockOut(u);else if(u.side==='enemy')S.enemyKills++}if(remain<=0)break}return applied;
+}
+function nodeDamage(n,side,amount){
+ if(n.owner===side||amount<=0)return 0;
+ if(side==='ally'&&n.id==='HQ'&&!unlocked(4))return 0;
+ let actual=0;
+ // 정예 지휘관 → 병기 시설 → 거점 방어력 순서로 공략
+ if(side==='ally'){
+  if(n.elite>0){let take=Math.min(n.elite,amount);n.elite-=take;amount-=take;actual+=take;if(n.elite===0)log(n.name+'의 적 정예병/지휘관을 제압했습니다.','good')}
+  if(n.facility>0&&amount>0){let take=Math.min(n.facility,Math.max(1,Math.round(amount*.65)));n.facility-=take;amount-=take;actual+=take;if(n.facility===0)log(n.name+' 공략 시설 파괴 완료','good')}
+ }else if(n.owner==='ally'){
+  // 적은 경비대와 거점 HP를 돌파해 재점령
+  let guards=S.units.filter(u=>u.kind==='guard'&&u.r===n.r&&u.c===n.c&&u.hp>0);
+  if(guards.length){let guard=guards[0];let take=Math.min(guard.hp,amount);guard.hp-=take;amount-=take;actual+=take;if(guard.hp<=0)log(n.name+'의 아군 경비대가 격파됐습니다.','bad')}
+ }
+ if(amount>0){const take=Math.min(n.hp,amount);n.hp-=take;actual+=take}
+ if(n.hp===0&&n.elite===0&&n.facility===0&&side==='ally')claim(n,'ally');
+ else if(n.hp===0&&side==='enemy')claim(n,'enemy');
+ return actual;
+}
+function claim(n,side){
+ if(n.owner===side)return;
+ n.owner=side;n.hp=Math.ceil(n.max*(side==='ally'?.66:.57));n.elite=0;n.facility=0;
+ S.units=S.units.filter(u=>!(u.kind==='guard'&&u.r===n.r&&u.c===n.c));
+ let guardHp=Math.round((side==='ally'?25:16)*(side==='ally'?1:SCENARIOS[S.stage].scale));
+ S.units.push({id:(side==='ally'?'G':'X')+(++ids),side,kind:'guard',name:side==='ally'?'회색갈기 주둔 경비대':'발더 주둔군',r:n.r,c:n.c,hp:guardHp,max:guardHp,atk:side==='ally'?8:6,cool:0,cmd:'hold',path:[]});
+ log((side==='ally'?'점령 성공: ':'적이 재탈환: ')+n.name+(side==='ally'?' · 주둔 경비대 배치':''),side==='ally'?'good':'bad');
+ if(n.type==='fort')log('요새 소유 변경! '+(side==='ally'?'회색갈기':'발더')+' 세력의 공격 보너스에 반영됩니다.','warn');
+ if(n.id==='HQ'&&side==='ally')finish('win');
+}
+function fightTile(r,c){
+ let friends=allAt('ally',r,c),hostiles=allAt('enemy',r,c),heroHere=S.hero.cool===0&&S.hero.r===r&&S.hero.c===c&&S.hero.hp>0;
+ // 우선이동 부대는 공격하지 않고, 그 위치에서 적의 공격을 받기만 한다.
+ let fighters=friends.filter(u=>u.kind!=='leader'||u.cmd!=='rush');
+ if(hostiles.length&&(friends.length||heroHere)){
+   for(const u of friends)if(u.kind==='leader')u.foughtThisTurn=true;
+   const ap=fighters.reduce((sum,u)=>sum+u.atk+fortBonus('ally'),0);
+   const ep=hostiles.reduce((sum,u)=>sum+u.atk+fortBonus('enemy'),0);
+   if(ap>0)focusDamage(hostiles,ap,'ally');
+   if(friends.length)focusDamage(friends,ep,'enemy');
+   else if(heroHere)S.hero.hp=Math.max(0,S.hero.hp-ep);
+   log(nameAt(r,c)+' 교전: 아군 반격 '+ap+' / 적 공격 '+ep+(friends.some(u=>u.kind==='leader'&&u.cmd==='rush')?' · 우선이동 부대 공격 제외':''),'warn');
+   if(heroHere&&S.hero.hp<=0){S.hero.cool=3;S.hero.target=null;log('클리프가 전장 이탈. 3턴 후 재출격합니다.','bad')}
+ }
+ friends=allAt('ally',r,c);hostiles=allAt('enemy',r,c);
+ fighters=friends.filter(u=>u.kind!=='leader'||u.cmd!=='rush');
+ const n=nAt(r,c);if(!n)return;
+ if(n.owner==='enemy'&&hostiles.length===0&&fighters.length){
+  for(const u of fighters)if(u.kind==='leader')u.foughtThisTurn=true;
+  if(n.id==='HQ'&&!unlocked(4))return;
+  const dmg=fighters.reduce((sum,u)=>sum+u.atk+fortBonus('ally'),0);
+  if(dmg)nodeDamage(n,'ally',dmg);
+ }else if(n.owner==='ally'&&hostiles.length&&friends.length===0&&!(heroHere&&S.hero.hp>0)){
+  const dmg=hostiles.reduce((sum,u)=>sum+u.atk+fortBonus('enemy'),0);
+  nodeDamage(n,'enemy',dmg);
+ }
+}
+
+function assaultHQ(){
+ const n=nId('HQ');if(n.owner==='ally')return;
+ if(!unlocked(4))return;
+ // HQ tile is handled by fightTile; no remote combat
+}
+function artilleryFire(){
+ for(const n of S.nodes.filter(n=>n.type==='siege')){
+  if(S.turn%2!==0&&n.owner!=='ally')continue;
+  const side=n.owner,dir=side==='ally'?1:-1;
+  // 점령 세력은 사거리 내(시험값: 맨해튼 거리 2 이내)의 다른 거점 공략에 활용한다.
+  const eligible=S.nodes.filter(t=>t.owner!==side&&t.id!==n.id&&dist(t,n)<=2&&
+    (t.c-n.c)*dir>=0 && (side!=='ally'||(t.id!=='HQ'||unlocked(4))));
+  const target=eligible.sort((a,b)=>Math.abs(a.r-n.r)-Math.abs(b.r-n.r)||b.c*dir-a.c*dir)[0];
+  if(!target)continue;
+  const damage=side==='ally'?(target.id==='HQ'?BAL.ally_artillery_hq_damage:BAL.ally_artillery_damage):BAL.enemy_artillery_damage;
+  const guards=allAt(target.owner,target.r,target.c).filter(u=>u.kind==='guard');
+  let actual=0;
+  if(guards.length){actual=focusDamage(guards,damage,side)}
+  else if(target.elite>0){actual=Math.min(target.elite,damage);target.elite-=actual}
+  else{actual=Math.min(Math.max(0,target.hp-1),damage);target.hp-=actual}
+  if(side==='ally')S.allyArtilleryDamageDealt+=actual;else S.enemyArtilleryDamageDealt+=actual;
+  log((side==='ally'?'아군':'적')+' 공성병기 포격: '+target.name+' · 실제 피해 '+actual,side==='ally'?'good':'warn');
+ }
+}
+
+function enemyWavePeriod(stage,difficulty){return difficulty==='challenge'?SCENARIOS[stage].enemyChallengePeriod:SCENARIOS[stage].enemyPeriod}
+function produce(){
+ const cfg=SCENARIOS[S.stage];
+ for(const n of S.nodes.filter(n=>n.type==='general')){
+  const interval=n.owner==='ally'?BAL.ally_production_interval:BAL.enemy_production_interval; // 일반 거점 증가를 고려해 적 생산 주기를 완화 (시험값)
+  if(S.turn%interval!==0)continue;
+  const side=n.owner,capUnits=side==='ally'?BAL.ally_soldier_cap:cfg.spawnLimit;
+  let alive=S.units.filter(u=>u.side===side&&u.kind==='soldier'&&u.hp>0).length;
+  if(alive>=capUnits)continue;
+  addUnit(side,'soldier',n.r,n.c,{hp:side==='ally'?26:Math.round(24*cfg.scale),atk:side==='ally'?8:7});
+  log(n.name+'에서 '+(side==='ally'?'회색갈기':'발더')+' 일반 병력이 생산됐습니다.');
+ }
+ if(S.turn>0&&S.turn%(enemyWavePeriod(S.stage,S.difficulty))===0){
+  S.wave++;
+  const rows=S.wave%2?[0,1]:[2,1];let spawned=0;
+  for(const r of rows){let alive=S.units.filter(u=>u.side==='enemy'&&u.kind==='soldier'&&u.hp>0).length;
+   if(alive>=cfg.spawnLimit)continue;
+   const lateWaveToughness=(S.stage===2&&S.difficulty==='challenge')?BAL.stage3_challenge_wave_hp_multiplier:1;
+   addUnit('enemy','soldier',r,4,{hp:Math.round((27+S.wave*2)*cfg.scale*lateWaveToughness),atk:8+Math.floor(S.wave/3)});spawned++;
+  }
+  log('적 증원 '+S.wave+'단계: '+(spawned?spawned+'개 부대 출격':'병력 상한 도달 · 추가 출격 없음'),spawned?'warn':'');
+  // 2회마다 한 번의 측면 침투: 기존 병력 중 한 명이 본진 돌파 임무로 전환된다.
+  // 추가 병력을 강제로 생성하지 않아 일반 증원 상한을 지킨다.
+  if(S.stage>0&&S.wave===2){
+   const flank=S.wave%2?0:2;
+   const squad=S.units.find(u=>u.side==='enemy'&&u.kind==='soldier'&&u.hp>0&&u.r===flank&&u.c===4&&!u.raider);
+   if(squad){squad.raider=true;squad.raidLane=flank;squad.name='발더 침투병';squad.atk=BAL.raider_attack;S.raiderCount++;
+    log('측면 침투 경보: '+LANE[flank]+'에서 적 침투병이 아군 출격지를 노립니다.','bad');}
+  }
+ }
+}
+function supplyAndHealing(){
+ // 신규 시험 규칙: 지휘 부대는 안전한 아군 출격지/점령 거점에 정지한 상태로
+ // 2턴 이상 머물 때부터 회복한다. 진격/우선이동 중 또는 교전·적 기동병 접근 시 회복 불가.
+ for(const u of S.units.filter(u=>u.side==='ally'&&u.hp>0&&u.cool===0)){
+  if(u.kind==='leader'){
+   const n=currentNode('ally',u.r,u.c),isFriendly=(u.c===0||!!n);
+   // 적 주둔군은 고정 방어 병력이라 인접 거리 경계에서 제외, 적 기동병만 위협 판정.
+   const threatened=S.units.some(e=>e.side==='enemy'&&e.kind!=='guard'&&e.cool===0&&e.hp>0&&
+      Math.abs(e.r-u.r)<=1&&Math.abs(e.c-u.c)<=1);
+   const safe=isFriendly&&(u.cmd==='hold'||u.path.length===0)&&!u.movedThisTurn&&
+      !u.foughtThisTurn&&!threatened&&allAt('enemy',u.r,u.c).length===0;
+   if(!safe){u.restTurns=0;continue}
+   u.restTurns=(u.restTurns||0)+1;u.totalRestTurns=(u.totalRestTurns||0)+1;
+   if(u.restTurns>=BAL.rest_delay_turns&&u.hp<u.max){
+    const amount=BAL.rest_heal_base+((u.c===0||(n&&n.type==='general'))?BAL.rest_heal_bonus:0);
+    const gained=Math.min(u.max-u.hp,amount);
+    if(gained>0){u.hp+=gained;u.restHealedTotal=(u.restHealedTotal||0)+gained;
+     S.healingThisTurn+=gained;S.restHealingTotal+=gained;
+     log(u.name+' 안전 지역 휴식: HP +'+gained+' ('+u.hp+'/'+u.max+')','good');}
+   }
+  }else if(u.kind==='guard'&&allAt('enemy',u.r,u.c).length===0){u.hp=Math.min(u.max,u.hp+2)}
+ }
+ // 주둔 부대의 거점 유지 효과: 병력을 직접 지휘하는 것과 주둔을 구분
+ for(const n of S.nodes.filter(n=>n.owner==='ally')){
+  if(allAt('enemy',n.r,n.c).length)continue;
+  if(allAt('ally',n.r,n.c).some(u=>u.kind==='leader'&&u.cmd==='hold'))n.hp=Math.min(n.max,n.hp+3)
+ }
+}
+function enemyBaseDamage(){
+ for(let r=0;r<3;r++){
+  let attackers=allAt('enemy',r,0);
+  if(!attackers.length||allAt('ally',r,0).length||(S.hero.cool===0&&S.hero.r===r&&S.hero.c===0))continue;
+  let dmg=Math.min(30,attackers.reduce((v,u)=>v+u.atk+2,0));
+  S.baseHp=Math.max(0,S.baseHp-dmg);log('적군이 '+LANE[r]+' 출격지에 도달해 아군 본진에 '+dmg+' 피해를 입혔습니다!','bad')
+ }
+ if(S.baseHp<=0)finish('loss')
+}
+function finish(kind){if(isOver())return;S.result=kind;stopAuto();let total=S.campaign.turns+S.turn;
+ if(kind==='win'){
+  S.campaign.turns=total;S.campaign.hero+=S.heroCount;S.campaign.losses+=S.deadCount;S.campaign.cleared.push(S.stage);
+  log('작전 성공 · '+SCENARIOS[S.stage].title+' 완료 ('+S.turn+'턴).','good');
+  try{let key='greymanes_stage_'+S.stage+'_'+S.difficulty;let best=Number(localStorage.getItem(key)||0);if(!best||S.turn<best)localStorage.setItem(key,String(S.turn))}catch{}
+ }else log('회색갈기 본진 함락 · 작전 실패','bad');
+ recordFrame();
+}
+function tick(){if(isOver())return;S.turn++;
+ S.healingThisTurn=0;
+ for(const u of S.units.filter(u=>u.kind==='leader'&&u.side==='ally')){u.movedThisTurn=false;u.foughtThisTurn=false;}
+ heroMovement();
+ for(const u of S.units.filter(u=>u.kind==='leader'&&u.side==='ally'))moveLeader(u);
+ for(const u of [...S.units].filter(u=>u.kind==='soldier'&&u.side==='ally'))autoSoldierMove(u);
+ for(const u of [...S.units].filter(u=>u.kind==='soldier'&&u.side==='enemy'))enemyMove(u);
+ for(let c=0;c<=4&&!isOver();c++)for(let r=0;r<3&&!isOver();r++)fightTile(r,c);
+ if(!isOver()){
+  artilleryFire();supplyAndHealing();produce();enemyBaseDamage();
+  prune();
+ }
+ S.events.push({turn:S.turn,baseHp:S.baseHp,owned:S.nodes.filter(n=>n.c<=3&&n.owner==='ally').length,allyMobile:S.units.filter(u=>u.side==='ally'&&u.kind!=='guard'&&u.hp>0).length,enemyMobile:S.units.filter(u=>u.side==='enemy'&&u.kind!=='guard'&&u.hp>0).length,heroActions:S.heroCount,knockouts:S.deadCount,enemyKills:S.enemyKills,wave:S.wave});
+ recordFrame();draw()
+}
+function heroMove(){if(isOver())return;let n=nId(S.selectedId);if(!n){log('이동 목적지 미선택','bad');draw();return}if(S.hero.cool>0){log('클리프 재출격 대기 중입니다.','bad');draw();return}S.hero.target=rect(n.r,n.c);log('클리프 이동 목표: '+n.name+(!unlocked(n.c)?' · 열린 전선까지만 먼저 이동':'') ,'good');draw()}
+function heroAct(){if(isOver())return;let h=S.hero,n=nId(S.selectedId);
+ if(!n||n.type==='home'){log('아군 출격지는 공격 대상이 아닙니다. 적 거점을 선택해 주세요.','warn');draw();return}
+ if(h.cool>0){log('클리프는 재출격 대기 중입니다.','bad');draw();return}
+ if(h.r!==n.r||h.c!==n.c){log('클리프 위치 불일치 · 목표 거점 도착 후 공격 가능','bad');draw();return}
+ if(S.heroUseTurn===S.turn){log('클리프 공격 사용 완료 · 다음 턴 대기','warn');draw();return}
+ let hostile=allAt('enemy',h.r,h.c),dmg=BAL.hero_attack;
+ let actual=0;
+ if(hostile.length){actual=focusDamage(hostile,dmg,'ally');log('클리프 공격: 적 병력에 '+actual+' 피해','good')}
+ else if(n.owner==='enemy'){actual=nodeDamage(n,'ally',dmg);log('클리프 공격: '+n.name+'에 '+actual+' 피해','good')}
+ else{log('공격 대상 없음','warn');draw();return}
+ S.heroCount++;S.heroDamageDealt+=actual;S.heroUseTurn=S.turn;
+ // 직접 전투는 한 턴의 주요 행동으로 처리. 적도 다음 턴에 반격한다.
+ if(!isOver())tick();else {recordFrame();draw()}
+}
+// UTF-8 BOM + RFC4180 CSV escaping; Excel formula injection also escaped for textual fields.
+const csvFields={
+ turn:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','turn','result','base_hp','base_hp_max','base_hp_change_turn','owned_total','owned_change_turn','ally_leader_hp_total','ally_leader_hp_min','owned_general','owned_fort','owned_siege','enemy_wave','hero_r','hero_c','hero_hp','hero_hp_max','hero_cool','hero_actions','ally_leaders_active','ally_soldiers','enemy_soldiers','ally_knockouts','ally_knockouts_new_turn','enemy_unit_kills','resting_leaders','rest_hp_recovered_turn','rest_hp_recovered_total'],
+ unit:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','turn','unit_id','unit_name','side','kind','row','col','hp','hp_max','respawn_cooldown','command','remaining_waypoints'],
+ node:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','turn','node_id','node_name','node_type','row','col','owner','hp','hp_max','elite_hp','facility_hp','garrison_count','garrison_hp','ally_present','enemy_present'],
+ event:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','turn','event_index','severity','detail']
+};
+function csvValue(v){
+ const s=v===null||v===undefined?'':String(v);
+ const safe= /^\s*[=+@]/.test(s)?"'"+s:s;
+ return /[",\r\n]/.test(safe)?'"'+safe.replace(/"/g,'""')+'"':safe;
+}
+function downloadCsv(kind){
+ const rows={turn:S.turnFrames,unit:S.unitFrames,node:S.nodeFrames,event:S.eventLog}[kind];
+ if(!rows||!rows.length){log('해당 형식의 저장된 기록이 없습니다.','warn');draw();return}
+ const fields=csvFields[kind];
+ const base={session_id:S.sessionId,source:S.recordSource,engine_version:ENGINE_VERSION,balance_config_id:S.config_id,stage:S.stage+1,stage_name:SCENARIOS[S.stage].title,difficulty:S.difficulty};
+ const lines=[fields.map(csvValue).join(',')];
+ for(const row of rows)lines.push(fields.map(k=>csvValue(row[k]===undefined?base[k]:row[k])).join(','));
+ const file={turn:'턴별전황',unit:'병력이동_HP',node:'거점상태',event:'명령_전투이벤트'}[kind];
+ const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
+ a.download='회색갈기_'+S.sessionId+'_전장'+(S.stage+1)+'_'+S.difficulty+'_'+file+'.csv';
+ document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);
+ log(file+' CSV '+rows.length+'행 다운로드 요청','good');draw();
+}
+// 실측 데이터만 사용하여 요약/거점/지휘 부대 CSV를 생성한다. 피해량은 턴별 HP 하락분의 합으로서 근사치임.
+function baseMeta(){return {session_id:S.sessionId,source:S.recordSource,engine_version:ENGINE_VERSION,balance_config_id:S.config_id,stage:S.stage+1,stage_name:SCENARIOS[S.stage].title,difficulty:S.difficulty};}
+function analysisSnapshots(){
+ const unitBy=new Map(),nodeBy=new Map();
+ for(const row of S.unitFrames){if(!unitBy.has(row.unit_id))unitBy.set(row.unit_id,[]);unitBy.get(row.unit_id).push(row)}
+ for(const row of S.nodeFrames){if(!nodeBy.has(row.node_id))nodeBy.set(row.node_id,[]);nodeBy.get(row.node_id).push(row)}
+ return {unitBy,nodeBy};
+}
+function leaderStats(unitId,rows){
+ const out={unit_id:unitId,unit_name:rows[0]?.unit_name||'',turns_on_field:0,movement_turns:0,damage_received_hp_drop:0,min_hp:100,knockouts:0,respawn_wait_turns:0,final_hp:0,final_row:0,final_col:0};
+ let prev=null;
+ for(const r of rows){
+  if(r.turn>0&&r.respawn_cooldown===0&&r.hp>0)out.turns_on_field++;
+  if(r.respawn_cooldown>0)out.respawn_wait_turns++;
+  if(r.hp<out.min_hp)out.min_hp=r.hp;
+  if(prev){
+   if(r.row!==prev.row||r.col!==prev.col)out.movement_turns++;
+   if(prev.hp>r.hp)out.damage_received_hp_drop+=prev.hp-r.hp;
+   if(prev.respawn_cooldown===0&&r.respawn_cooldown>0)out.knockouts++;
+  }
+  prev=r;
+ }
+ if(prev){out.final_hp=prev.hp;out.final_row=prev.row;out.final_col=prev.col}
+ return out;
+}
+function balanceNodeRows(){
+ const {nodeBy}=analysisSnapshots(),base=baseMeta();
+ return S.nodes.map(n=>{
+  const rows=nodeBy.get(n.id)||[],last=rows[rows.length-1]||n;
+  let firstAllyTurn='',allyControlTurns=0,allyCaptures=0,enemyRecaptures=0,lastOwner='enemy',minDefense=n.max;
+  for(const r of rows){
+   if(r.turn>0&&r.owner==='ally')allyControlTurns++;
+   if(firstAllyTurn===''&&r.owner==='ally')firstAllyTurn=r.turn;
+   if(lastOwner!==r.owner){if(r.owner==='ally')allyCaptures++;else enemyRecaptures++}
+   lastOwner=r.owner;
+   minDefense=Math.min(minDefense,r.hp);
+  }
+  return {...base,node_id:n.id,node_name:n.name,type:n.type,front:n.c,initial_defense_hp:rows[0]?.hp_max||n.max,first_ally_capture_turn:firstAllyTurn,ally_capture_count:allyCaptures,enemy_recapture_count:enemyRecaptures,ally_owned_turns:allyControlTurns,defense_hp_min:minDefense,final_owner:last.owner||n.owner,final_defense_hp:last.hp};
+ });
+}
+function balanceUnitRows(){const {unitBy}=analysisSnapshots(),base=baseMeta();return ['A1','A2','A3','CLIFF'].map(id=>({...base,...leaderStats(id,unitBy.get(id)||[])}));}
+function balanceSummaryRows(){
+ const frames=S.turnFrames,base=baseMeta(),last=frames[frames.length-1]||{},nodes=balanceNodeRows(),units=balanceUnitRows();
+ const firstCapture=nodes.map(n=>n.first_ally_capture_turn).filter(x=>x!=='');
+ const shots=S.eventLog.filter(e=>String(e.detail||'').includes('아군 공성병기 포격:')).length;
+ const enemyShots=S.eventLog.filter(e=>String(e.detail||'').includes('적 공성병기 포격:')).length;
+ const baseMin=frames.reduce((min,f)=>Math.min(min,f.base_hp),S.baseMax);
+ const unitHpLoss=units.reduce((sum,u)=>sum+u.damage_received_hp_drop,0);
+ const avgAllies=frames.length>1?Math.round(frames.slice(1).reduce((s,f)=>s+f.ally_soldiers,0)/(frames.length-1)*100)/100:0;
+ const avgEnemies=frames.length>1?Math.round(frames.slice(1).reduce((s,f)=>s+f.enemy_soldiers,0)/(frames.length-1)*100)/100:0;
+ return [{...base,...S.tuningSnapshot,turns:S.turn,result:S.result||'in_progress',rest_hp_recovered_total:S.restHealingTotal||0,rest_turns_total:S.units.filter(u=>u.kind==='leader'&&u.side==='ally').reduce((sum,u)=>sum+(u.totalRestTurns||0),0),base_hp_initial:S.baseMax,base_hp_final:S.baseHp,base_hp_lost:S.baseMax-S.baseHp,base_hp_min:baseMin,first_capture_turn:firstCapture.length?Math.min(...firstCapture):'',captured_at_end:last.owned_total||0,ally_capture_events:nodes.filter(n=>n.node_id!=='HQ').reduce((s,n)=>s+n.ally_capture_count,0),enemy_recapture_events:nodes.filter(n=>n.node_id!=='HQ').reduce((s,n)=>s+n.enemy_recapture_count,0),ally_general_at_end:last.owned_general||0,ally_fort_at_end:last.owned_fort||0,ally_siege_at_end:last.owned_siege||0,ally_artillery_shots:shots,enemy_artillery_shots:enemyShots,ally_artillery_damage_dealt:S.allyArtilleryDamageDealt,enemy_artillery_damage_dealt:S.enemyArtilleryDamageDealt,hero_actions:S.heroCount,hero_damage_dealt:S.heroDamageDealt,ally_leader_knockouts:S.deadCount,leader_and_hero_hp_drop_sum:unitHpLoss,enemy_unit_kills:S.enemyKills,enemy_infiltration_count:S.raiderCount,enemy_wave_last:S.wave,average_ally_soldiers:avgAllies,average_enemy_soldiers:avgEnemies,observed_frames:frames.length,notes:'지휘 부대 HP 감소량은 턴 스냅샷 기준 근사치; 자체 시뮬레이터 데이터(이용자 관측치 아님)'}];
+}
+function csvDownload(name,fields,records){
+ const lines=[fields.map(csvValue).join(',')];
+ for(const row of records)lines.push(fields.map(k=>csvValue(row[k])).join(','));
+ const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+ // The Blob implementation below is deliberately replaced by normal literal BOM/newline for browsers.
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.download='회색갈기_'+S.sessionId+'_'+S.config_id+'_'+name+'.csv';a.href=url;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);
+ const status=$('balanceImportStatus');status.textContent=name+' CSV '+records.length+'행 다운로드 요청 · '+S.config_id;status.className='balance-status ok';
+}
+const analysisFields={
+ summary:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','ally_attack','hero_attack','stage_enemy_scale','enemy_wave_interval','rest_delay_turns','rest_heal_base','rest_heal_bonus','node_defense_multiplier_mean','turns','result','base_hp_initial','base_hp_final','base_hp_lost','base_hp_min','first_capture_turn','captured_at_end','ally_capture_events','enemy_recapture_events','ally_general_at_end','ally_fort_at_end','ally_siege_at_end','ally_artillery_shots','enemy_artillery_shots','ally_artillery_damage_dealt','enemy_artillery_damage_dealt','hero_actions','hero_damage_dealt','ally_leader_knockouts','rest_hp_recovered_total','rest_turns_total','leader_and_hero_hp_drop_sum','enemy_unit_kills','enemy_wave_last','average_ally_soldiers','average_enemy_soldiers','observed_frames','notes'],
+ node:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','node_id','node_name','type','front','initial_defense_hp','first_ally_capture_turn','ally_capture_count','enemy_recapture_count','ally_owned_turns','defense_hp_min','final_owner','final_defense_hp'],
+ unit:['session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','unit_id','unit_name','turns_on_field','movement_turns','damage_received_hp_drop','min_hp','knockouts','respawn_wait_turns','final_hp','final_row','final_col']
+};
+function exportBalance(kind){const rows=kind==='summary'?balanceSummaryRows():kind==='node'?balanceNodeRows():balanceUnitRows();csvDownload('밸런스_'+({summary:'한판요약',node:'거점별',unit:'지휘부대별'}[kind]),analysisFields[kind],rows);}
+function archiveSession(){
+ if(!S||S.turn===0||HISTORY.some(r=>r.session_id===S.sessionId))return;
+ HISTORY.push({...balanceSummaryRows()[0],result:S.result||'aborted',notes:'재시작 전 세션 기록',archive_reason:S.result||'restart_before_finish'});
+}
+// 밸런스 의사결정에 필요한 실측 정보만 추린다. 보조 좌표·미세 상태값은 다운로드하지 않는다.
+const MAJOR_RESULT_FIELDS=[
+ 'session_id','source','engine_version','balance_config_id','stage','stage_name','difficulty','result','turns',
+ 'first_capture_turn','base_hp_final','base_hp_lost','captured_at_end','enemy_recapture_events',
+ 'ally_leader_knockouts','hero_actions','hero_damage_dealt','rest_hp_recovered_total','ally_artillery_shots','ally_artillery_damage_dealt','enemy_artillery_damage_dealt','enemy_unit_kills',
+ 'ally_attack','hero_attack','raider_attack','stage_enemy_scale','enemy_wave_interval','late_wave_hp_multiplier'
+];
+const MAJOR_TURN_FIELDS=[
+ 'session_id','source','engine_version','balance_config_id','stage','difficulty','turn','major_events',
+ 'captured_nodes','enemy_recaptured_nodes','base_damage_turn','base_hp_remaining',
+ 'owned_total','new_leader_knockouts','enemy_wave','result'
+];
+function importantTurns(){
+ const items=[],frames=S.turnFrames,byTurn=new Map();
+ for(const n of S.nodeFrames){if(!byTurn.has(n.turn))byTurn.set(n.turn,new Map());byTurn.get(n.turn).set(n.node_id,n)}
+ for(let i=1;i<frames.length;i++){
+  const current=frames[i],previous=frames[i-1],currNodes=byTurn.get(current.turn)||new Map(),prevNodes=byTurn.get(previous.turn)||new Map();
+  const captured=[],recaptured=[];let hqCaptured=false;
+  for(const [id,node] of currNodes){const before=prevNodes.get(id);if(!before||before.owner===node.owner)continue;
+   if(before.owner!=='ally'&&node.owner==='ally'){if(id==='HQ')hqCaptured=true;else captured.push(node.node_name);}
+   else if(before.owner==='ally'&&node.owner==='enemy')recaptured.push(node.node_name);
+  }
+  const damage=Math.max(0,previous.base_hp-current.base_hp),newLoss=Math.max(0,current.ally_knockouts-previous.ally_knockouts),types=[];
+  if(captured.length)types.push('아군 점령');
+  if(hqCaptured)types.push('적 본진 점령');
+  if(recaptured.length)types.push('적 재탈환');
+  if(damage>0)types.push('본진 피해');
+  if(newLoss>0)types.push('지휘부대 이탈');
+  if(current.enemy_wave>previous.enemy_wave)types.push('적 증원');
+  if(S.eventLog.some(e=>e.turn===current.turn&&e.detail.startsWith('측면 침투 경보:')))types.push('측면 침투');
+  if(current.result&&current.result!=='ongoing')types.push(current.result==='win'?'승리':'패배');
+  if(!types.length)continue;
+  items.push({session_id:current.session_id,source:current.source,engine_version:current.engine_version,balance_config_id:current.balance_config_id,
+   stage:current.stage,difficulty:current.difficulty,turn:current.turn,major_events:types.join(' | '),
+   captured_nodes:captured.join(' | '),enemy_recaptured_nodes:recaptured.join(' | '),base_damage_turn:damage,
+   base_hp_remaining:current.base_hp,owned_total:current.owned_total,new_leader_knockouts:newLoss,
+   leader_knockouts_total:current.ally_knockouts,enemy_wave:current.enemy_wave,
+   hero_actions_total:current.hero_actions,rest_hp_recovered_total:current.rest_hp_recovered_total,
+   result:current.result});
+ }
+ return items;
+}
+function exportKeyTurns(){
+ if(!S||S.turn===0){$('balanceImportStatus').textContent='1턴 이상 진행해야 주요 전황이 기록됩니다.';return}
+ const rows=importantTurns();
+ if(!rows.length){$('balanceImportStatus').textContent='아직 거점 점령·본진 피해·부대 이탈·증원 등 주요 사건이 없습니다.';return}
+ csvDownload('핵심_전황변화',MAJOR_TURN_FIELDS,rows);
+}
+// 현재 전장에 영향을 주는 주요 설정만 추출한다. 다른 상세 설정은 엔진 내부에 보존.
+const MAJOR_GLOBAL_KEYS=new Set([
+ 'ally_attack','hero_attack','fort_bonus_per_fort','ally_production_interval',
+ 'enemy_production_interval','ally_artillery_damage','ally_artillery_hq_damage','enemy_artillery_damage','raider_attack','stage3_challenge_wave_hp_multiplier','ally_soldier_cap',
+ 'rest_delay_turns','rest_heal_base','rest_heal_bonus'
+]);
+const MAJOR_STAGE_KEYS=new Set(['scale','enemyPeriod','enemyChallengePeriod','spawnLimit','base']);
+const MAJOR_NODE_KEYS={1:[],2:['N2'],3:['HQ']};
+function majorBalanceFields(stage){return BAL_FIELDS.filter(f=>
+ (f.scope==='global'&&MAJOR_GLOBAL_KEYS.has(f.key)&&
+    (f.key!=='stage3_challenge_wave_hp_multiplier'||(stage===3&&S.difficulty==='challenge'))&&
+    (f.key!=='raider_attack'||stage>1))||
+ (f.scope==='stage'&&f.stage===stage&&MAJOR_STAGE_KEYS.has(f.key))||
+ (f.scope==='node'&&f.stage===stage&&(MAJOR_NODE_KEYS[stage]||[]).includes(f.key))
+);}
+function exportBalanceHistory(){
+ const rows=HISTORY.filter(r=>r.result==='win'||r.result==='loss');
+ if(S&&S.turn>0&&(S.result==='win'||S.result==='loss')&&!HISTORY.some(r=>r.session_id===S.sessionId))rows.push({...balanceSummaryRows()[0],archive_reason:S.result});
+ if(!rows.length){$('balanceImportStatus').textContent='승리 또는 패배로 끝낸 전투가 없습니다. 중도 재시작한 전투는 성과 집계에서 제외됩니다.';return}
+ // 제1전장에는 침투병이 없으므로 미적용 공격력을 빈칸으로 남깁니다.
+ const exported=rows.map(r=>({...r,raider_attack:Number(r.stage)===1?'':r.raider_attack}));
+ csvDownload('핵심_실험성과',MAJOR_RESULT_FIELDS,exported);
+}
+
+function exportBalanceConfig(){
+ const rows=majorBalanceFields(S.stage+1).map(f=>({scope:f.scope,stage:f.stage,parameter:f.key,value:getBalanceValue(f),min:f.min,max:f.max,description:f.desc}));
+ // not editable by design: requested HP 100 invariant.
+ rows.unshift({scope:'fixed',stage:'all',parameter:'leader_and_cliff_hp',value:100,min:100,max:100,description:'회색갈기 지휘 부대 및 클리프 HP 100 (변경 불가)'});
+ csvDownload('핵심_밸런스설정',['scope','stage','parameter','value','min','max','description'],rows);
+}
+// RFC 4180 reader: commas and quoted cells work; never eval CSV contents.
+function parseCSV(text){
+ const content=text.replace(/^\uFEFF/,'');let rows=[],cur=[],field='',quoted=false;
+ for(let i=0;i<content.length;i++){
+  const ch=content[i];if(quoted){if(ch==='"'&&content[i+1]==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}
+  else if(ch==='"')quoted=true;
+  else if(ch===','){cur.push(field);field=''}
+  else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&content[i+1]==='\n')i++;cur.push(field);if(cur.some(v=>v.trim()!==''))rows.push(cur);cur=[];field=''}
+  else field+=ch;
+ }
+ if(quoted)throw Error('닫히지 않은 따옴표가 있습니다.');
+ if(cur.length||field!==''){cur.push(field);if(cur.some(v=>v.trim()!==''))rows.push(cur)}
+ return rows;
+}
+async function importBalanceConfig(file){
+ const status=$('balanceImportStatus');
+ try{
+  if(!file)return;
+  if(file.size>200000)throw Error('설정 CSV는 200KB 이하만 지원합니다.');
+  const rows=parseCSV(await file.text());if(rows.length<2)throw Error('설정 행이 없습니다.');
+  const cols=rows[0].map(c=>c.trim());if(new Set(cols).size!==cols.length)throw Error('중복된 CSV 열 이름이 있습니다.');
+  const idx=Object.fromEntries(cols.map((c,i)=>[c,i]));
+  for(const key of ['scope','stage','parameter','value'])if(idx[key]===undefined)throw Error('필수 열 없음: '+key);
+  const found=new Map(),updates=[];
+  for(const data of rows.slice(1)){
+   const scope=String(data[idx.scope]||'').trim(),stage=String(data[idx.stage]||'').trim(),parameter=String(data[idx.parameter]||'').trim(),raw=String(data[idx.value]||'').trim();
+   if(scope==='fixed'){if(parameter!=='leader_and_cliff_hp'||Number(raw)!==100)throw Error('HP는 100으로 고정되어 있습니다.');continue}
+   const f=BAL_FIELDS.find(f=>f.scope===scope&&String(f.stage)===stage&&f.key===parameter);
+   if(!f)throw Error('등록되지 않은 설정: '+scope+'/'+stage+'/'+parameter);
+   if(found.has(scope+stage+parameter))throw Error('설정 행 중복: '+parameter);
+   const num=Number(raw);if(raw===''||!Number.isFinite(num)||num<f.min||num>f.max||(f.integer&&!Number.isInteger(num)))throw Error('값이 허용 범위를 벗어났습니다: '+parameter+' = '+raw+' (허용 '+f.min+'~'+f.max+')');
+   found.set(scope+stage+parameter,true);updates.push({f,num});
+  }
+  const isFullConfig=updates.length===BAL_FIELDS.length;
+  if(!isFullConfig){
+   const expected=majorBalanceFields(S.stage+1);
+   const expKeys=new Set(expected.map(f=>f.scope+'/'+f.stage+'/'+f.key));
+   const wrongStage=updates.some(({f})=>!expKeys.has(f.scope+'/'+f.stage+'/'+f.key));
+   if(wrongStage)throw Error('현재 전장의 핵심 설정 파일이 아닙니다. 해당 전장을 먼저 선택한 뒤 불러오세요.');
+   if(updates.length!==expected.length)throw Error('핵심 설정 행이 누락됐습니다. '+updates.length+'/'+expected.length+'개. 원본 행을 삭제하지 마세요.');
+  }
+  const changed=updates.filter(({f,num})=>getBalanceValue(f)!==num);
+  if(S.turn>0&&!window.confirm('현재 전투가 재시작됩니다. 기존 CSV 기록을 먼저 내보냈나요?'))return;
+  stopAuto();for(const {f,num} of updates){if(f.scope==='global')BAL[f.key]=num;else if(f.scope==='node')NODE_MUL[f.stage-1][f.key]=num;else SCENARIOS[f.stage-1][f.key]=num}
+  setUp(S.stage,S.difficulty,false);
+  status.textContent=`핵심 설정 ${updates.length}개 적용 · 변경 ${changed.length}개 · ${configHash()} · 현재 전장 재시작`;
+  status.className='balance-status ok';
+ }catch(err){status.textContent='설정 적용 실패: '+err.message;status.className='balance-status err'}
+ finally{$('balanceImport').value=''}
+}
+
+function exportCsv(){downloadCsv('turn')}
+function currentBest(){try{return localStorage.getItem('greymanes_stage_'+S.stage+'_'+S.difficulty)||'—'}catch{return '—'}}
+function pointLabel(n){let guard=S.units.find(u=>u.kind==='guard'&&u.hp>0&&u.r===n.r&&u.c===n.c);
+ return n.owner==='ally'?'아군 점령':n.id==='HQ'?'적 본진':'적 점령'}
+function movePos(u){let p=POS(u.r,u.c);return p}
+function setSelected(id){S.selectedId=id;draw()}
+function selectArmy(id){S.selectedUnit=id;draw()}
+function buildRoutes(){
+ // 대각선 연결선을 모두 그리면 지도가 복잡하므로 차단된 수직 통로만 명시한다.
+ // SCENARIOS[].bridge와 roadAllows()로부터 직접 계산해 실제 길찾기 규칙과 일치시킨다.
+ const lines=[];
+ const x=c=>100+200*c,y=r=>123+156.5*r;
+ const blocked=[];
+ for(let c=0;c<=3;c++)for(let r=0;r<2;r++){
+  if(!roadAllows({r,c},{r:r+1,c}))blocked.push({r,c});
+ }
+ for(let r=0;r<3;r++)for(let c=0;c<4;c++){
+  if(c===3&&r!==1)continue;
+  lines.push(`<line x1="${x(c)}" y1="${y(r)}" x2="${x(c+1)}" y2="${y(r)}" stroke="#678595" stroke-width="1.7" stroke-dasharray="2 13" opacity=".20"/>`);
+ }
+ $('roads').innerHTML=lines.join('');
+ const blockers=$('blockedPaths');blockers.replaceChildren();
+ // SVG viewBox(1000×560)를 POS(r,c) 위치 비율과 동일하게 환산한다.
+ // 각 차단선은 같은 열의 두 거점 중심 사이 실제 수직 통로에만 배치한다.
+ const blockSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ blockSvg.setAttribute('viewBox','0 0 1000 560');blockSvg.setAttribute('preserveAspectRatio','none');
+ blockSvg.setAttribute('role','img');
+ blockSvg.setAttribute('aria-label',blocked.length+'곳의 상하 통로 차단 위치');
+ for(const {r,c} of blocked){
+  const cx=POS(r,c).x*10,cy=(POS(r,c).y+POS(r+1,c).y)*2.8;
+  // 거점 카드의 상하 끝 바로 사이(중간 통로 45px)에 짧은 끊긴 선을 그린다.
+  const name=`제${c}전선 ${LANE[r]}↔${LANE[r+1]} 상하 통행 차단`;
+  const line=document.createElementNS('http://www.w3.org/2000/svg','g');
+  line.innerHTML=`<title>${name} (대각선 우회 가능)</title>
+   <line class="blocked-rail" x1="${cx}" y1="${cy-26}" x2="${cx}" y2="${cy+26}"/>
+   <line class="blocked-cap" x1="${cx-17}" y1="${cy-23}" x2="${cx+17}" y2="${cy-23}"/>
+   <line class="blocked-cap" x1="${cx-17}" y1="${cy+23}" x2="${cx+17}" y2="${cy+23}"/>
+   <circle class="blocked-halo" cx="${cx}" cy="${cy}" r="16"/>
+   <text class="blocked-symbol" x="${cx}" y="${cy+1}">×</text>`;
+  blockSvg.append(line);
+ }
+ blockers.append(blockSvg);
+ const notice=$('roadNotice');
+ notice.textContent=blocked.length
+  ?`제${blocked[0].c}전선 상하 통로 ${blocked.length}곳 차단 · 대각선 우회 가능`
+  :'이 전장은 통행 불가 구간 없음 · 상하·대각 이동 가능';
+ notice.classList.toggle('open',blocked.length===0);
+}
+function drawRouteOverlay(){
+ const overlay=$('plannedRoutes'),summary=$('routeSummary');
+ if(!overlay||!summary)return;
+ const u=S.units.find(x=>x.id===S.selectedUnit);
+ if(!u||!u.path.length){overlay.innerHTML='';summary.hidden=true;summary.textContent='';return}
+ const x=c=>100+200*c,y=r=>123+156.5*r;
+ const accent=u.cmd==='rush'?'#ffd17a':u.cmd==='advance'?'#72ffdb':'#72e4ff';
+ const from=rect(u.r,u.c),positions=[from],pending=[];
+ let current=from,reachable=true,reservedPoints=[];
+ for(let i=0;i<u.path.length;i++){
+  const goal=u.path[i];
+  if(reachable){
+   const result=routeTowardGoal(current,goal,'ally',u.cmd);
+   if(result.path!==null){positions.push(...result.path);current=positions[positions.length-1]}
+   if(result.path!==null&&!result.pending){current=goal;continue}
+   reachable=false;pending.push({p:goal,index:i+1});
+   if(result.remaining.length){reservedPoints=[current,...result.remaining];current=goal}
+   continue;
+  }
+  pending.push({p:goal,index:i+1});
+  const future=routeFind(current,goal,'ally',u.cmd,true);
+  if(future){
+   if(!reservedPoints.length)reservedPoints=[current];
+   reservedPoints.push(...future);current=goal;
+  }
+ }
+ let markup='';
+ if(positions.length>1){
+  const coords=positions.map(p=>`${x(p.c)},${y(p.r)}`).join(' ');
+  // 뚜렷한 외곽선 + 경로 라인, 점선 애니메이션 대신 안정적인 고정 점선 사용.
+  markup+=`<polyline points="${coords}" fill="none" stroke="#071a26" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity=".88"/>`;
+  markup+=`<polyline class="active-route" points="${coords}" fill="none" stroke="${accent}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14 7"/>`;
+  const head=positions[positions.length-1],pre=positions[positions.length-2];
+  const angle=Math.atan2(y(head.r)-y(pre.r),x(head.c)-x(pre.c))*180/Math.PI;
+  // 마지막 이동 방향을 직관적으로 보여주는 화살표(목표 거점 중앙에 그리지 않음).
+  const tx=x(head.c)-(x(head.c)-x(pre.c))*0.24,ty=y(head.r)-(y(head.r)-y(pre.r))*0.24;
+  markup+=`<path d="M -9 -6 L 0 0 L -9 6" transform="translate(${tx} ${ty}) rotate(${angle})" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`;
+ }
+ if(reservedPoints.length>1){
+  const reservedCoords=reservedPoints.map(p=>`${x(p.c)},${y(p.r)}`).join(' ');
+  markup+=`<polyline points="${reservedCoords}" fill="none" stroke="#15222b" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity=".90"/>`;
+  markup+=`<polyline class="pending-route" points="${reservedCoords}" fill="none" stroke="#ffc879" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 12"/>`;
+ }
+ // 경유지에 번호 배지를 별도로 표시하여 선이 겹치더라도 등록 순서를 알 수 있도록 한다.
+ for(let i=0;i<u.path.length;i++){
+  const p=u.path[i],reserved=pending.some(a=>a.index===i+1);
+  // 거점 이름을 덮지 않게 상단 왼쪽으로 배치한다.
+  const xx=x(p.c)-58,yy=y(p.r)-51;
+  markup+=`<g transform="translate(${xx},${yy})"><rect x="-16" y="-13" width="32" height="26" rx="7" fill="${reserved?'#6b4c27':'#123a48'}" stroke="${reserved?'#ffd17a':accent}" stroke-width="2.5"/><text x="0" y="5" fill="#ffffff" font-size="16" font-weight="800" text-anchor="middle">${i+1}</text></g>`;
+  if(reserved)markup+=`<circle class="reserved-destination" cx="${x(p.c)}" cy="${y(p.r)}" r="15" fill="none" stroke="#ffcb77" stroke-width="4" stroke-dasharray="5 5"/>`;
+ }
+ overlay.innerHTML=markup;
+ const modes={advance:'진격',rush:'우선이동',hold:'명령 대기',retreat:'복귀'};
+ const states=u.path.map((p,i)=>`${i+1}.${nameAt(p.r,p.c)}`).join(' → ');
+ summary.textContent=`${u.name} · ${modes[u.cmd]||'명령 대기'} | ${states}`+(pending.length?' · 청록색=현재 이동 구간, 노란색=전선 개방 대기':'');
+ summary.hidden=false;
+}
+
+function draw(rest=false){
+ const camp=SCENARIOS[S.stage];
+ $('turnValue').textContent=S.turn;$('baseValue').textContent=S.baseHp+' / '+S.baseMax;
+ $('baseBar').style.width=(100*S.baseHp/S.baseMax)+'%';
+ $('holdValue').textContent=countOwned(1)+countOwned(2)+countOwned(3)+' / 9';
+ $('waveValue').textContent=S.wave;
+ $('troopsValue').textContent=S.units.filter(u=>u.side==='ally'&&u.kind!=='guard'&&u.hp>0).length+' : '+S.units.filter(u=>u.side==='enemy'&&u.kind!=='guard'&&u.hp>0).length;
+ $('recordValue').textContent=currentBest()==='—'?'—':currentBest()+'턴';
+ $('csvStatus').textContent=`현재 ${S.turn}턴`;
+
+ $('scenarioName').textContent=camp.title;
+ $('scenarioDesc').textContent=camp.description+' · 적 증원 '+enemyWavePeriod(S.stage,S.difficulty)+'턴 주기';
+ $('cliffValue').textContent=S.hero.cool?'재출격 '+S.hero.cool+'턴':'HP '+S.hero.hp+'/'+S.hero.max;
+ $('cliffWhere').textContent=nameAt(S.hero.r,S.hero.c);
+ if(rest)buildRoutes();drawRouteOverlay();
+ const places=$('places');places.replaceChildren();
+ for(let r=0;r<3;r++){
+  for(let c=0;c<=4;c++){
+   if(c===4&&r!==1){const camp=document.createElement('div'),p=POS(r,c);camp.className='fort-node enemy-camp';camp.style.left=p.x+'%';camp.style.top=p.y+'%';camp.innerHTML='<span class="meta">적 증원</span><strong>'+LANE[r]+' 집결지</strong><div class="hp-line">병력 출격</div>';places.append(camp);continue;}
+   const n=nAt(r,c),home=c===0,homeId='HOME_'+r;const p=POS(r,c), b=document.createElement('button');
+   b.type='button';b.dataset.nodeid=n?n.id:homeId;
+   b.className='fort-node '+(!n?'home':n.owner==='ally'?'allied':n.id==='HQ'?'headquarters':'hostile');
+   const isChosen=(n&&S.selectedId===n.id)||(home&&S.selectedId===homeId);
+   if(isChosen)b.classList.add('selected');
+   b.setAttribute('aria-pressed',String(Boolean(isChosen)));
+   if(n&&!unlocked(c))b.classList.add('locked');
+   b.style.left=p.x+'%';b.style.top=p.y+'%';
+   if(n){let extra=n.elite>0?'정예 '+n.elite+' · ':'';
+   if(n.facility>0)extra+='시설 '+n.facility;
+   let guard=S.units.find(u=>u.kind==='guard'&&u.hp>0&&u.r===n.r&&u.c===n.c);
+   if(n.owner==='ally')extra+=(guard?'경비 '+guard.hp:'경비 없음');else{let def=S.units.find(u=>u.kind==='guard'&&u.side==='enemy'&&u.hp>0&&u.r===n.r&&u.c===n.c);if(def)extra+=' 수비병 '+def.hp;}
+   b.innerHTML=`<span class="meta">${n.id==='HQ'?'최종 목표':'제'+c+'전선'} · ${TYPE_LABEL[n.type]} · ${pointLabel(n)}</span><strong>${n.name}</strong><div class="hp-line">방어력 ${n.hp}/${n.max}</div><div class="meter"><i style="width:${100*n.hp/n.max}%"></i></div><div class="extra">${extra||'기본 방어'}</div>`;
+   b.onclick=()=>setSelected(n.id);
+   b.setAttribute('aria-label',n.name+' 선택');b.title=n.name+' · '+TYPE_LABEL[n.type]+' · '+(n.owner==='ally'?'아군':'적군')+' · 방어력 '+n.hp+'/'+n.max;
+   }else{
+    b.innerHTML=`<span class="meta">아군 출격지</span><strong>${LANE[r]} 출격지</strong><div class="hp-line">후퇴 · 재출격</div><div class="extra">이동 목적지 지정 가능</div>`;
+    b.onclick=()=>setSelected(homeId);
+    b.setAttribute('aria-label',LANE[r]+' 출격지 선택');b.title=LANE[r]+' 출격지 · 이동 및 자동 회복 가능';
+   }
+   places.append(b)
+  }
+ }
+ const layer=$('tokens'),alive=S.units.filter(u=>u.hp>0&&u.cool===0);
+ // Soldiers sharing a tile are shown as a stack; combat and CSV still use original units.
+ const soldierGroups=new Map();
+ for(const u of alive.filter(u=>u.kind==='soldier')){
+  const key=[u.side,u.r,u.c,u.raider?'raider':'normal'].join('-');
+  if(!soldierGroups.has(key))soldierGroups.set(key,[]);
+  soldierGroups.get(key).push(u);
+ }
+ const displayedSoldiers=[];
+ for(const [key,group] of soldierGroups){
+  if(group.length===1){displayedSoldiers.push(group[0]);continue}
+  const first=group[0];
+  displayedSoldiers.push({...first,id:'STACK-'+key,name:(first.raider?'침투병':'일반병')+' '+group.length+'개 부대',hp:group.reduce((sum,u)=>sum+u.hp,0),groupCount:group.length});
+ }
+ const tokens=[...alive.filter(u=>u.kind!=='soldier'),...displayedSoldiers,...(S.hero.cool===0&&S.hero.hp>0?[{id:'CLIFF',side:'hero',kind:'hero',r:S.hero.r,c:S.hero.c,hp:S.hero.hp,name:'클리프'}]:[])];
+ const liveIds=new Set();
+ for(const u of tokens){liveIds.add(u.id);let el=document.getElementById('piece-'+u.id);
+  if(!el){el=document.createElement('button');el.type='button';el.id='piece-'+u.id;layer.append(el)}
+  let p=movePos(u), group=tokens.filter(v=>v.r===u.r&&v.c===u.c), index=group.findIndex(v=>v.id===u.id);
+  const dx=cap((index%4)*25-35,-55,55),dy=68+Math.floor(index/4)*24;
+  el.style.left=`calc(${p.x}% + ${dx}px)`;el.style.top=`calc(${p.y}% + ${dy}px)`;
+  el.className='piece '+(u.side==='hero'?'hero':u.side==='enemy'&&u.kind==='guard'?'enemy enemyguard':u.side==='enemy'?'enemy':u.kind==='guard'?'guard':u.kind==='leader'?'leader':'soldier')+(u.id===S.selectedUnit?' active':'')+(u.raider?' raider':'');
+  el.innerHTML=`<b>${u.side==='hero'?'✦':u.side==='enemy'?'⚑':u.kind==='leader'?'♜':u.kind==='guard'?'▣':'♟'}</b><span>${u.side==='hero'?'클리프':u.kind==='leader'?u.id:u.kind==='guard'?'수비':u.groupCount>1?(u.raider?'침투':'일반')+'×'+u.groupCount:u.raider?'침투':u.id}</span><small>${u.hp}</small>`;
+  el.title=(u.name||'클리프')+' · '+nameAt(u.r,u.c)+(u.groupCount?' · 합산 HP ':' · HP ')+u.hp;
+  el.onclick=()=>{if(u.kind==='leader')selectArmy(u.id)};
+  el.style.pointerEvents=u.kind==='leader'?'auto':'none';
+  el.tabIndex=u.kind==='leader'?0:-1;
+  el.setAttribute('aria-label',el.title)
+ }
+ for(const el of [...layer.children]){if(!liveIds.has(el.id.replace('piece-','')))el.remove()}
+ const unitCards=$('units');unitCards.replaceChildren();
+ for(const u of S.units.filter(u=>u.kind==='leader')){
+  let b=document.createElement('button');b.type='button';b.className='army-card'+(u.id===S.selectedUnit?' chosen':'');
+  const recoveryHint=(u.path.length===0&&u.hp<u.max&&u.cool===0&&(u.c===0||currentNode('ally',u.r,u.c)))
+   ?(u.restTurns>=BAL.rest_delay_turns?'자동 회복 +'+(BAL.rest_heal_base+(u.c===0||currentNode('ally',u.r,u.c)?.type==='general'?BAL.rest_heal_bonus:0))+'/턴'
+     :u.restTurns>0?'안전 대기 '+u.restTurns+'/'+BAL.rest_delay_turns+'턴':'안전 대기 시 자동 회복')
+   :({advance:'진격',rush:'우선이동',hold:'주둔',retreat:'복귀'}[u.cmd]||'주둔');
+  b.innerHTML=`<b>♜ ${u.name}</b><span>${u.cool?'재출격 '+u.cool+'턴':'HP '+u.hp+'/'+u.max}</span><span>${nameAt(u.r,u.c)}</span><span class="muted">${recoveryHint}${u.path.length?' · '+u.path.length+' 경유지':''}</span>`;
+  b.dataset.unitid=u.id;
+  b.setAttribute('aria-pressed',String(u.id===S.selectedUnit));
+  b.onclick=()=>selectArmy(u.id);unitCards.append(b)
+ }
+ let n=nId(S.selectedId),selUnit=S.units.find(u=>u.id===S.selectedUnit);
+ $('selectedText').innerHTML=n.type==='home'
+  ?`<strong>${n.name}</strong> · 아군 출격지<div>본진 HP ${S.baseHp}/${S.baseMax} · 이동/휴식 가능</div>`
+  :`<strong>${n.name}</strong> · ${TYPE_LABEL[n.type]} · ${n.owner==='ally'?'아군':'적군'}<div>방어 ${n.hp}/${n.max}${n.elite?' · 정예 '+n.elite:''}${n.facility?' · 시설 '+n.facility:''} · ${unlocked(n.c)?'진입 가능':'전선 잠금'}</div>`;
+ $('routeText').textContent=selUnit.path.length?(selUnit.cmd==='hold'?'지정된 경로 (명령 대기): ':'지정된 경로 (실행 중): ')+selUnit.path.map(p=>nameAt(p.r,p.c)).join(' → '):'경로 없음 · 거점 선택 → [경로 선택]';
+ const hasPath=selUnit.path.length>0,canCommand=selUnit.cool===0&&!isOver();
+ let nextPhase='route',nextMessage='목적지 선택 → [경로 선택]';
+ if(isOver()){nextPhase='go';nextMessage='작전 종료 · 전장 재시작 또는 다음 전장'}
+ else if(selUnit.cool>0){nextMessage=selUnit.name+' 재출격 대기 '+selUnit.cool+'턴 · 다른 부대 선택'}
+ else if(hasPath&&selUnit.cmd==='hold'){nextPhase='order';nextMessage='경로 등록 완료 · [진격] / [우선이동] 선택'}
+ else if(hasPath&&selUnit.cmd==='advance'){nextPhase=selUnit.frontierWaiting?'route':'go';nextMessage=selUnit.frontierWaiting?'전선 개방 대기 · 앞선 거점을 점령하면 진격 재개':'진격 명령 설정 · [1턴 진행]으로 실행'}
+ else if(hasPath&&selUnit.cmd==='rush'){nextPhase=selUnit.frontierWaiting?'route':'go';nextMessage=selUnit.frontierWaiting?'전선 개방 대기 · 앞선 거점을 점령하면 이동 재개':'우선이동 명령 설정 · [1턴 진행]으로 실행'}
+ $('orderText').textContent=nextMessage;
+ $('orderText').dataset.phase=nextPhase;
+ const waypointReady=canCommand&&selUnit.path.length<8&&(!selUnit.path.length?!eq(selUnit,n):!eq(selUnit.path[selUnit.path.length-1],n));
+ $('waypoint').disabled=!waypointReady;
+ $('clearRoute').disabled=!hasPath||!canCommand;
+ $('waypoint').classList.toggle('is-ready',waypointReady);
+ $('advance').disabled=!hasPath||!canCommand;
+ $('rush').disabled=!hasPath||!canCommand;
+ for(const [id,mode] of [['advance','advance'],['rush','rush']]){
+  const btn=$(id),active=selUnit.cmd===mode&&selUnit.path.length>0;
+  btn.classList.toggle('is-active',active);
+  btn.setAttribute('aria-pressed',String(active));
+ }
+ $('routeHelp').textContent=selUnit.name+' · 목표: '+n.name;
+ const logEl=$('log');logEl.replaceChildren();for(const entry of S.log){const e=document.createElement('div');e.className='event '+entry.type;const time=document.createElement('strong');time.textContent='T'+entry.t;e.append(time,document.createTextNode(' '+entry.text));logEl.append(e)}
+ const n1=countOwned(1),n2=countOwned(2),n3=countOwned(3);
+ $('unlockText').textContent=`제1전선 ${n1}/3 · 제2전선 ${n2}/3 · 제3전선 ${n3}/3 · 적 본진 ${unlocked(4)?'진입 가능':'잠금'}`;
+ const intruders=S.units.filter(u=>u.side==='enemy'&&u.raider&&u.hp>0&&u.cool===0);
+ $('raidNotice').hidden=!intruders.length;
+ if(intruders.length){let threat=intruders.reduce((best,u)=>!best||u.c<best.c?u:best,null);
+  $('raidNotice').textContent='측면 침투 · '+LANE[threat.raidLane]+' 출격지 위협 · 현재 위치 '+nameAt(threat.r,threat.c)+' · 경로 변경 또는 클리프 방어 필요';}
+ $('effectText').textContent=`아군 요새 공격 +${fortBonus('ally')} / 적 요새 공격 +${fortBonus('enemy')} · 아군 일반 거점 ${S.nodes.filter(n=>n.owner==='ally'&&n.type==='general').length} · 공성병기 ${S.nodes.filter(n=>n.owner==='ally'&&n.type==='siege').length}`;
+ let result=$('result');result.className='endcard'+(S.result==='loss'?' fail':'');
+ if(S.result){
+  let campaignDone=S.stage===SCENARIOS.length-1;
+  result.innerHTML=`<div class="end-title">${S.result==='win'?'작전 성공':'작전 실패'}</div><div>${S.result==='win'?'적 본진 점령 완료':'아군 본진 함락'} · ${S.turn}턴 · 클리프 공격 ${S.heroCount}회 · 부대 이탈 ${S.deadCount}회</div><div class="end-actions"><button id="restartResult">다시 도전</button>${S.result==='win'&&!campaignDone?'<button id="nextScenario">다음 전장 →</button>':''}</div>`;
+  $('restartResult').onclick=()=>setUp(S.stage,S.difficulty,false);
+  let next=$('nextScenario');if(next)next.onclick=()=>setUp(S.stage+1,S.difficulty,true)
+ }else result.innerHTML='';
+ for(const id of ['heroMove','heroAct','tick','skip'])$(id).disabled=isOver();
+ $('auto').disabled=isOver();
+ 
+}
+$('advance').onclick=()=>command('advance');$('rush').onclick=()=>command('rush');
+$('waypoint').onclick=addWaypoint;$('clearRoute').onclick=clearWaypoint;
+$('heroMove').onclick=heroMove;$('heroAct').onclick=heroAct;$('tick').onclick=tick;
+$('skip').onclick=()=>{stopAuto();for(let i=0;i<4&&!isOver();i++)tick()};
+$('auto').onclick=()=>{if(timer){stopAuto();return}if(isOver())return;timer=setInterval(()=>{tick();if(isOver())stopAuto()},1000);$('auto').textContent='자동 중지'};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAuto()});
+$('exportKeyTurns').onclick=exportKeyTurns;
+$('exportBalanceHistory').onclick=exportBalanceHistory;
+$('exportBalanceConfig').onclick=exportBalanceConfig;
+$('balanceImport').onchange=e=>importBalanceConfig(e.target.files[0]);
+$('restart').onclick=()=>{if(S.turn>0&&!isOver()&&!window.confirm('전장을 재시작할까요? 미완료 기록은 성과 CSV에 포함되지 않습니다.'))return;setUp(S.stage,S.difficulty,false)};
+$('applySetting').onclick=()=>{if(S.turn>0&&!isOver()&&!window.confirm('전장을 변경할까요? 현재 진행 상태가 초기화됩니다.'))return;setUp(Number($('stageSelect').value),$('difficultySelect').value,false)};
+setUp(0,'standard');
+
+ // v24.11: 기능별 튜토리얼. 각 기능은 별도 선택·복습 가능, 전투 규칙은 변경하지 않습니다.
+ let tutorialOpen=true,lessonSelected='',practiceStep=-1,practiceLesson='',practiceUnit='',practiceTarget='';
+ let practiceExpectedSession='',practiceFeedback='',practiceAwait=false,practiceHeroCount=0;
+ let tutorialReturnFocus=null,practiceCurrentSteps=[];
+ const lessonMeta={
+  basic:{tag:'01 · 부대 지휘',title:'부대 지휘',summary:'거점 지정 → 경로 등록 → 진격 → 턴 진행',items:[
+    ['부대 선택','지휘 패널에서 부대 선택'],
+    ['경로 지정','지도에서 목적지 선택 후 [경로 선택]'],
+    ['진격','[진격] 선택 후 [1턴 진행]']]},
+  cliff:{tag:'02 · 클리프',title:'클리프',summary:'거점 이동 후 직접 공격. 부대와 별도로 조작.',items:[
+    ['목적지','지도에서 공격할 거점 선택'],
+    ['이동','클리프 [이동] → [1턴 진행]. 거리에 따라 여러 턴 소요'],
+    ['공격','목적지 도착 후 클리프 [공격]']]},
+  rush:{tag:'03 · 우선이동',title:'우선이동',summary:'공격하지 않고 이동. 이동 중 피격 가능.',items:[
+    ['경로 등록','부대·목적지 선택 후 [경로 선택]'],
+    ['명령','[우선이동] 선택'],
+    ['실행','[1턴 진행]']]},
+  rules:{tag:'04 · 전장 규칙',title:'전장 규칙',summary:'거점 효과, 승리 조건, 자동 회복, 기록',items:[
+    ['거점','일반: 병력 생산 · 요새: 소유 세력 공격력 증가 · 병기: 포격 지원'],
+    ['전선 개방','직전 전선 거점 1곳 이상 점령 시 다음 전선 진입 가능'],
+    ['승리·패배','제3전선 3거점 점령 후 적 본진 점령 시 승리 · 아군 본진 HP 0 시 패배'],
+    ['자동 회복','안전한 아군 출격지·일반 거점에서 2턴 대기 후 +8 HP/턴, 그 외 아군 거점 +5 HP/턴. 이동·교전·적 접근 시 중단'],
+    ['측면 침투·통행 제한','제2·3전장: 적 침투병이 출격지 공격. 붉은 경보 확인. 차단된 상하 통로는 이용 불가, 대각 우회 가능'],
+    ['CSV','핵심 성과: 승패·손실 · 주요 전황: 사건 발생 턴 · 핵심 설정: 밸런스 수치. 자세한 항목은 [CSV 항목 설명] 참고']]}
+ };
+ function renderLessonSelection(){
+  $('lessonMenu').hidden=!!lessonSelected;
+  $('lessonInfo').hidden=!lessonSelected;
+  if(!lessonSelected)return;
+  const meta=lessonMeta[lessonSelected];
+  $('lessonInfoTag').textContent=meta.tag;
+  $('lessonInfoTitle').textContent=meta.title;
+  $('lessonInfoText').textContent=meta.summary;
+  $('lessonInfoBody').innerHTML='';
+  for(const [title,detail] of meta.items){
+   const item=document.createElement('div');item.className='lesson-detail-item';
+   const strong=document.createElement('strong');strong.textContent=title;
+   const span=document.createElement('span');span.textContent=detail;
+   item.append(strong,span);$('lessonInfoBody').append(item);
+  }
+  $('lessonInfoBody').className='lesson-detail-list';
+  $('lessonLaunch').hidden=lessonSelected==='rules';
+  $('lessonLaunch').textContent='실습 시작';
+ }
+ function practiceTargetElement(){
+  if(practiceStep<0||practiceStep>=practiceCurrentSteps.length)return null;
+  const selector=practiceCurrentSteps[practiceStep].target();
+  return selector?document.querySelector(selector):null;
+ }
+ function locatePracticeTarget(scroll=true){
+  document.querySelectorAll('.practice-spotlight').forEach(el=>el.classList.remove('practice-spotlight'));
+  const target=practiceTargetElement();if(!target)return;
+  target.classList.add('practice-spotlight');
+  if(!scroll)return;
+  target.scrollIntoView({behavior:'instant',block:'center',inline:'center'});
+  requestAnimationFrame(()=>{
+   if(practiceStep<0||target!==practiceTargetElement())return;
+   const rect=target.getBoundingClientRect(),coach=$('practiceCoach').getBoundingClientRect();
+   if(rect.top<20)window.scrollBy({top:rect.top-70,behavior:'instant'});
+   else if(rect.bottom>coach.top-16 && rect.left<coach.right && rect.right>coach.left){
+    window.scrollBy({top:rect.bottom-coach.top+42,behavior:'instant'});
+   }
+  });
+ }
+ function renderPractice(scroll=true){
+  const box=$('practiceCoach');box.hidden=practiceStep<0;
+  if(practiceStep<0){document.querySelectorAll('.practice-spotlight').forEach(el=>el.classList.remove('practice-spotlight'));return}
+  const step=practiceCurrentSteps[practiceStep],done=step.key==='done';
+  $('practiceCount').textContent=done?'실습 완료':`${practiceStep+1} / ${practiceCurrentSteps.length-1}`;
+  box.querySelector('.practice-subtitle').textContent=lessonMeta[practiceLesson].tag;
+  $('practiceTitle').textContent=step.title;
+  $('practiceDetail').textContent=step.detail();
+  $('practiceHint').textContent=practiceFeedback||(step.hint||'');
+  $('practiceTrack').innerHTML=Array.from({length:practiceCurrentSteps.length-1},(_,i)=>`<i class="${i<practiceStep?'done':i===practiceStep?'current':''}"></i>`).join('');
+  $('practiceFind').hidden=done;
+  $('practiceNext').hidden=!done;
+  $('practiceNext').textContent=practiceLesson==='basic'?'다음 · 클리프':practiceLesson==='cliff'?'다음 · 우선이동':'다음 · 전장 규칙';
+  $('practiceExit').textContent=done?'전투 계속':'실습 종료';
+  locatePracticeTarget(scroll);
+ }
+ function stopPractice(){practiceStep=-1;practiceFeedback='';practiceAwait=false;practiceLesson='';renderPractice(false)}
+ const unitRouteSteps=mode=>[
+  {key:'army',title:'부대 선택',detail:()=>`지휘 패널 · 회색갈기 ${practiceUnit.slice(1)}부대 선택`,hint:'부대별로 별도 명령을 지정합니다.',target:()=>`.army-card[data-unitid="${practiceUnit}"]`},
+  {key:'node',title:'목적지 선택',detail:()=>`전술 지도 · ${nId(practiceTarget)?.name||'첫 거점'} 선택`,hint:'선택한 거점이 이동 목표가 됩니다.',target:()=>`.fort-node[data-nodeid="${practiceTarget}"]`},
+  {key:'waypoint',title:'경로 등록',detail:()=>`[경로 선택]`,hint:'목적지 선택 후 경로 등록이 필요합니다.',target:()=> '#waypoint'},
+  {key:mode,title:mode==='advance'?'진격':'우선이동',detail:()=>mode==='advance'?'[진격] 선택':'[우선이동] 선택',hint:mode==='advance'?'진격: 이동 중 교전':'우선이동: 교전 없이 이동. 피격 가능',target:()=>mode==='advance'?'#advance':'#rush'},
+  {key:'tick',title:'턴 진행',detail:()=>`[1턴 진행]`,hint:'등록된 명령을 1턴 실행합니다.',target:()=> '#tick'},
+  {key:'done',title:mode==='advance'?'진격 실습 완료':'우선이동 실습 완료',detail:()=>mode==='advance'?'부대 이동 명령 적용 완료':'우선이동 명령 적용 완료',hint:'다른 항목 선택 또는 전투 계속 진행',target:()=>null}
+ ];
+ const cliffSteps=()=>[
+  {key:'node',title:'목적지 선택',detail:()=>`전술 지도 · ${nId(practiceTarget)?.name||'첫 거점'} 선택`,hint:'클리프는 별도 이동·공격 명령을 사용합니다.',target:()=>`.fort-node[data-nodeid="${practiceTarget}"]`},
+  {key:'heroMove',title:'클리프 이동',detail:()=>`클리프 · [이동] 선택`,hint:'이동 실행에는 턴 진행이 필요합니다.',target:()=> '#heroMove'},
+  {key:'tick',title:'이동 실행',detail:()=>`[1턴 진행]`,hint:'목적지까지 여러 턴이 걸릴 수 있습니다.',target:()=> '#tick'},
+  {key:'heroAct',title:'직접 공격',detail:()=>`클리프 · [공격] 선택`,hint:'공격 실행 시 턴이 함께 진행됩니다.',target:()=> '#heroAct'},
+  {key:'done',title:'클리프 실습 완료',detail:()=>`이동·공격 명령 적용 완료`,hint:'클리프는 한 턴에 한 번 직접 공격 가능',target:()=>null}
+ ];
+ function pickPracticeLeader(){return S.units.find(x=>x.side==='ally'&&x.kind==='leader'&&x.cool===0&&x.path.length===0&&x.cmd==='hold')}
+ function pickUnitTarget(u){
+  const ids=['N1','C1','S1'];
+  return [ids[u.home],...ids.filter(id=>id!==ids[u.home])].map(nId)
+   .find(n=>n&&!eq(u,n)&&(unlocked(n.c)||n.owner==='ally')&&routeFind(u,n,'ally')!==null);
+ }
+ function pickCliffTarget(){
+  const h=S.hero;
+  const candidates=S.nodes.filter(n=>n.c===1&&n.owner==='enemy'&&unlocked(n.c)&&!eq(n,h))
+   .sort((a,b)=>Math.abs(a.r-h.r)+Math.abs(a.c-h.c)-Math.abs(b.r-h.r)-Math.abs(b.c-h.c));
+  return candidates.find(n=>routeFind(h,n,'ally')?.length>0)||null;
+ }
+ function beginLesson(lesson){
+  if(lesson==='rules'){lessonSelected='rules';tutorialOpen=true;tutorialRender();renderLessonSelection();return}
+  if(isOver()){if(!window.confirm('전투 종료 상태입니다. 실습을 위해 전장을 재시작할까요?'))return;setUp(S.stage,S.difficulty,false)}
+  if(lesson==='cliff'){
+   if(S.hero.cool>0){window.alert('클리프 재출격 대기 중 · 대기 후 실습 또는 전장 재시작');return}
+   let target=pickCliffTarget();
+   if(!target){if(!window.confirm('클리프 실습 대상이 없습니다. 전장을 재시작할까요?'))return;setUp(S.stage,S.difficulty,false);target=pickCliffTarget()}
+   if(!target){window.alert('실습 가능 거점 없음');return}
+   practiceTarget=target.id;practiceUnit='';practiceCurrentSteps=cliffSteps();practiceHeroCount=S.heroCount;
+  }else{
+   let u=pickPracticeLeader();
+   if(!u){if(!window.confirm('명령 대기 부대 없음 · 전장 재시작 후 실습할까요?'))return;setUp(S.stage,S.difficulty,false);u=pickPracticeLeader()}
+   if(!u){window.alert('실습 가능 부대 없음');return}
+   practiceUnit=u.id;
+   const target=pickUnitTarget(u);
+   if(!target){window.alert('실습 가능 거점 없음');return}
+   practiceTarget=target.id;practiceCurrentSteps=unitRouteSteps(lesson==='rush'?'rush':'advance');
+  }
+  practiceLesson=lesson;practiceExpectedSession=S.sessionId;practiceStep=0;practiceFeedback='';practiceAwait=false;
+  stopAuto();tutorialClose();renderPractice(true);
+ }
+ function onPracticeClick(e){
+  if(practiceStep<0||practiceStep>=practiceCurrentSteps.length-1||e.target.closest?.('#practiceCoach'))return;
+  if(S.sessionId!==practiceExpectedSession){stopPractice();return}
+  const step=practiceCurrentSteps[practiceStep],key=step.key,button=e.target.closest?.('button');
+  if(!button)return;
+  const valid=()=>{
+   if(key==='army')return button.matches('.army-card')&&button.dataset.unitid===practiceUnit;
+   if(key==='node')return button.matches('.fort-node')&&button.dataset.nodeid===practiceTarget;
+   return button.id===key;
+  };
+  if(practiceAwait){e.preventDefault();e.stopImmediatePropagation();return}
+  if(!valid()){
+   // 실습에서는 명령 실수를 막되 실습 종료 시 모든 조작이 복구됩니다.
+   if(button.closest('#tutorialCard')||button.closest('#practiceCoach'))return;
+   e.preventDefault();e.stopImmediatePropagation();
+   practiceFeedback='표시된 항목을 선택하세요.';renderPractice(false);return;
+  }
+  const old=practiceStep,oldTurn=S.turn,prevHeroCount=S.heroCount;
+  practiceAwait=true;
+  setTimeout(()=>{
+   practiceAwait=false;
+   if(practiceStep!==old||S.sessionId!==practiceExpectedSession)return;
+   const u=S.units.find(x=>x.id===practiceUnit),n=nId(practiceTarget);
+   const checks={
+    army:()=>S.selectedUnit===practiceUnit,
+    node:()=>S.selectedId===practiceTarget,
+    waypoint:()=>u?.path.some(p=>eq(p,n)),
+    advance:()=>u?.cmd==='advance',
+    rush:()=>u?.cmd==='rush',
+    heroMove:()=>S.hero.target&&eq(S.hero.target,n),
+    heroAct:()=>S.heroCount>prevHeroCount,
+    tick:()=>S.turn>oldTurn
+   };
+   if(checks[key]?.()){
+    if(practiceLesson==='cliff'&&key==='tick'&&!eq(S.hero,n)){
+     practiceFeedback='클리프 이동 중 · [1턴 진행] 반복';
+     renderPractice(true);return;
+    }
+    practiceStep++;practiceFeedback='';renderPractice(true);
+   }else{
+    practiceFeedback='명령 미적용 · 표시된 항목 재선택';renderPractice(false);
+   }
+  },0);
+ }
+ document.addEventListener('click',onPracticeClick,true);
+ $('practiceFind').onclick=()=>locatePracticeTarget(true);
+ $('practiceNext').onclick=()=>{
+  const next=practiceLesson==='basic'?'cliff':practiceLesson==='cliff'?'rush':'rules';
+  stopPractice();
+  if(next==='rules'){lessonSelected='rules';tutorialShow();return}
+  lessonSelected=next;tutorialShow();
+ };
+ $('practiceExit').onclick=stopPractice;
+ function tutorialRender(){
+  $('tutorialCard').hidden=!tutorialOpen;$('tutorialBackdrop').hidden=!tutorialOpen;
+  $('openTutorial').setAttribute('aria-expanded',String(tutorialOpen));
+  if(tutorialOpen){renderLessonSelection();$('tutorialClose').focus({preventScroll:true})}
+  else (tutorialReturnFocus?.isConnected?tutorialReturnFocus:$('openTutorial')).focus({preventScroll:true});
+ }
+ function tutorialClose(){tutorialOpen=false;tutorialRender()}
+ function tutorialShow(){stopPractice();stopAuto();tutorialReturnFocus=document.activeElement;tutorialOpen=true;tutorialRender()}
+ $('openTutorial').onclick=()=>{lessonSelected='';tutorialShow()};
+ $('tutorialClose').onclick=tutorialClose;
+ $('tutorialSkip').onclick=tutorialClose;
+ $('tutorialBackdrop').onclick=tutorialClose;
+ $('lessonBack').onclick=()=>{lessonSelected='';renderLessonSelection()};
+ $('lessonLaunch').onclick=()=>beginLesson(lessonSelected);
+ document.querySelectorAll('.lesson-card').forEach(el=>el.onclick=()=>{lessonSelected=el.dataset.lesson;renderLessonSelection()});
+ document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+   if(tutorialOpen){e.preventDefault();tutorialClose()}
+   else if(practiceStep>=0){e.preventDefault();stopPractice()}
+  }
+  if(!tutorialOpen||e.key!=='Tab')return;
+  const buttons=[$('tutorialClose'),...Array.from(document.querySelectorAll('#tutorialCard button')).filter(b=>b.offsetParent!==null&&b!==$('tutorialClose'))];
+  const idx=buttons.indexOf(document.activeElement);
+  if(e.shiftKey&&idx<=0){e.preventDefault();buttons[buttons.length-1].focus()}
+  else if(!e.shiftKey&&idx===buttons.length-1){e.preventDefault();buttons[0].focus()}
+ });
+ window.__tutorialReady=true;tutorialRender();
+ window.__practiceState=()=>({step:practiceStep,lesson:practiceLesson,action:practiceStep<0?'off':practiceCurrentSteps[practiceStep]?.key,unit:practiceUnit,target:practiceTarget,feedback:practiceFeedback});
+window.__grayDebug=()=>JSON.parse(JSON.stringify(S));
+// 공개 테스트 인터페이스를 통한 전투 진행은 실제 사람의 수동 플레이로 표기하지 않는다.
+function markAutomatedSource(){S.recordSource='automated_policy';for(const x of [...S.turnFrames,...S.nodeFrames,...S.unitFrames])x.source='automated_policy'}
+window.__grayTest={exportKeyTurns,importantTurns,majorBalanceFields,exportBalanceHistory,exportBalance,balanceSummaryRows,balanceNodeRows,balanceUnitRows,exportBalanceConfig,importBalanceConfig,configHash,
+ tick:(...args)=>{markAutomatedSource();return tick(...args)},command:(...args)=>{markAutomatedSource();return command(...args)},
+ setSelected:(...args)=>{markAutomatedSource();return setSelected(...args)},selectArmy:(...args)=>{markAutomatedSource();return selectArmy(...args)},
+ heroMove:(...args)=>{markAutomatedSource();return heroMove(...args)},heroAct:(...args)=>{markAutomatedSource();return heroAct(...args)},
+ setUp:(...args)=>{setUp(...args);markAutomatedSource()},addWaypoint:(...args)=>{markAutomatedSource();return addWaypoint(...args)},
+ clearWaypoint:(...args)=>{markAutomatedSource();return clearWaypoint(...args)},routeFind,roadAllows,enemyMove,autoSoldierMove,downloadCsv,
+ markAutomated:markAutomatedSource};
+
+</script></body></html>
