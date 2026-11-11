@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1" name="viewport"/>
+    <title>회색갈기 대공세 | 전술 지도 시뮬레이터</title>
+    <link href="css/styles.css" rel="stylesheet"/>
+    <script defer src="js/config.js"></script>
+    <script defer src="js/engine.js"></script>
+    <script defer src="js/reports.js"></script>
+    <script defer src="js/interface.js"></script>
+    <script defer src="js/tutorial.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <div class="eyebrow">전술 시뮬레이터</div>
+          <h1>회색갈기 대공세</h1>
+          <p>세 지휘 부대의 이동 경로를 지정하고 클리프를 지휘해 적 본진을 점령하세요.</p>
+        </div>
+        <div class="alert">비공식 전술 프로토타입</div>
+      </header>
+      <div class="settings">
+        <label for="stageSelect">전장</label>
+        <select id="stageSelect"><option value="0">제1전장 · 국경 돌파</option><option value="1">제2전장 · 요새 공방</option><option value="2">제3전장 · 최후 대공세</option></select>
+        <label for="difficultySelect">난이도</label>
+        <select id="difficultySelect"><option value="standard">표준</option><option value="challenge">도전</option></select>
+        <button class="smallbtn" id="applySetting" type="button">전장 시작</button>
+        <button aria-controls="tutorialCard" aria-expanded="true" class="smallbtn" id="openTutorial" type="button">사용 방법</button>
+        <div class="scenario-info"><b id="scenarioName">제1전장</b><span id="scenarioDesc">전장 소개</span></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><strong id="turnValue">0</strong><span>진행 턴</span></div>
+        <div class="metric">
+          <strong id="baseValue">155 / 155</strong>
+          <span>회색갈기 본진 HP</span>
+          <div class="bar"><b id="baseBar"></b></div>
+        </div>
+        <div class="metric"><strong id="holdValue">0 / 9</strong><span>아군 점령 거점</span></div>
+        <div class="metric"><strong id="waveValue">1</strong><span>적 증원 단계</span></div>
+        <div class="metric"><strong id="troopsValue">3 : 2</strong><span>기동 병력 (아군 : 적군)</span></div>
+        <div class="metric"><strong id="recordValue">—</strong><span title="현재 브라우저에 저장된 전장별 기록">브라우저 최단</span></div>
+      </div>
+      <div class="layout">
+        <section class="panel">
+          <h2>전술 지도 <small>거점·병력 현황</small></h2>
+          <div class="legend"><span><i class="pin a"></i>아군</span><span><i class="pin e"></i>적군</span><span><i class="pin h"></i>클리프</span><span><i class="pin hq"></i>적 본진</span><span>일반 6 · 요새 2 · 병기 1</span><span>같은 칸의 일반병은 묶어서 표시</span><span>제2·3전장 침투병: 출격지 위협</span><span><span aria-hidden="true" class="block-legend"><span class="block-hatch"></span><span class="block-x">×</span></span>상하 통로 차단 (대각 우회 가능)</span></div>
+          <div class="objective-line"><strong>승리</strong> 제3전선 거점 3곳 확보 → 적 본진 점령 <span>·</span> <strong>패배</strong> 아군 본진 HP 0</div>
+          <div class="mobile-map-hint">↔ 모바일: 지도 좌우 이동</div>
+          <div aria-live="polite" class="raid-notice" hidden="" id="raidNotice" role="status"></div>
+          <div class="scroll">
+            <div class="field" id="field">
+              <svg class="roads" id="roads" preserveAspectRatio="none" viewBox="0 0 1000 560"></svg>
+              <div id="places"></div>
+              <svg aria-hidden="true" class="planned-routes" id="plannedRoutes" preserveAspectRatio="none" viewBox="0 0 1000 560"></svg>
+              <div aria-label="상하 통행이 차단된 구간" class="blocked-path-layer" id="blockedPaths"></div>
+              <div class="map-route-summary" hidden="" id="routeSummary" role="status"></div>
+              <div id="tokens"></div>
+            </div>
+          </div>
+          <div class="map-foot"><span id="unlockText">전선 개방</span><span class="road-notice" id="roadNotice" role="status">통행 상태 확인 중</span></div>
+          <div class="statusLine" id="effectText"></div>
+          <p class="map-rule">전선 개방: 직전 전선 거점 1곳 이상 점령 · 잠긴 목표 지정 시 이동 가능한 전선까지 진격 · 노란 점선: 개방 대기</p>
+        </section>
+        <section class="panel">
+          <h2>부대 지휘 <button class="smallbtn" id="restart" type="button">전장 재시작</button></h2>
+          <p class="command-guide"><b>부대 선택 → 거점 선택 → 경로 등록 → 명령 → 턴 진행</b></p>
+          <div class="army-grid" id="units"></div>
+          <div class="selected" id="selectedText"></div>
+          <div aria-live="polite" class="order-text next-action" data-phase="route" id="orderText" role="status"></div>
+          <div class="command-group route-group">
+            <div class="group-title">경로 지정 <small id="routeHelp">선택 거점을 경유지로 등록</small></div>
+            <div class="actions"><button class="route-btn" id="waypoint" type="button">경로 선택</button><button class="alt" id="clearRoute" type="button">경로 초기화</button></div>
+          </div>
+          <div aria-live="polite" class="route" id="routeText" role="status"></div>
+          <div class="command-group">
+            <div class="group-title">이동 명령 <small>경로 등록 필요</small></div>
+            <div class="actions orders"><button aria-pressed="false" class="order-button" id="advance" type="button">진격</button><button aria-pressed="false" class="order-button alt" id="rush" type="button">우선이동</button></div>
+            <p class="order-mini-help">진격: 교전하며 이동 · 우선이동: 공격 없이 이동</p>
+          </div>
+          <div aria-label="턴 진행" class="controlrow"><button class="smallbtn" id="tick" type="button">1턴 진행</button><button class="smallbtn" id="skip" type="button">4턴 진행</button><button class="smallbtn" id="auto" type="button">자동 진행</button></div>
+          <div class="cliff">
+            <div>
+              <strong>클리프</strong>
+              <div><span id="cliffValue"></span> · <span id="cliffWhere"></span></div>
+            </div>
+            <div class="actions"><button class="warn" id="heroMove" type="button">이동</button><button class="warn" id="heroAct" type="button">공격</button></div>
+          </div>
+          <p class="cliff-help">거점 선택 → 이동 → 도착 후 공격 · 공격 시 1턴 진행</p>
+          <p class="heal-line">자동 회복 · 안전한 아군 지역에서 2턴 대기 후 회복</p>
+          <details class="data-panel" id="dataPanel">
+            <summary class="data-panel-summary"><span>CSV 기록 · 밸런스 설정</span><small>3종</small></summary>
+            <div class="balance-lab">
+              <div class="csv-title">전투 기록 · 설정 <small id="csvStatus">0턴 기록</small></div>
+              <div class="csv-buttons">
+<button id="exportBalanceHistory" type="button">↓ 핵심 성과</button>
+<button id="exportKeyTurns" type="button">↓ 주요 전황</button>
+<button id="exportBalanceConfig" type="button">↓ 핵심 설정</button>
+</div>
+              <div class="csv-note"><b>핵심 성과</b> 승패·소요 턴·손실 · <b>주요 전황</b> 점령·피해 발생 턴 · <b>핵심 설정</b> 전투 수치</div>
+              <details class="csv-help" id="csvGuide">
+                <summary>CSV 항목 설명 · 실험 비교</summary>
+                <div class="csv-help-inner">
+                  <p><b>CSV 형식</b> · 표 형식 파일. 핵심 성과는 전투 1회당 1행, 주요 전황은 사건이 발생한 턴마다 1행을 기록합니다.</p>
+                  <p><b>핵심 성과</b> · 승리 여부, 소요 턴, 본진 피해, 지휘 부대 이탈을 비교합니다. 소요 턴은 같은 전장·난이도 기준으로 해석합니다.</p>
+                  <table class="csv-dictionary">
+                    <thead>
+                      <tr><th>항목</th><th>의미</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><code>result / turns</code></td><td>승리 또는 패배 / 종료할 때까지 진행한 턴</td></tr>
+                      <tr><td><code>first_capture_turn</code></td><td>아군이 처음으로 거점을 점령한 턴. 초반 진군 속도 확인용</td></tr>
+                      <tr><td><code>captured_at_end</code></td><td>종료 시 아군이 보유한 9개 거점 수. 적 본진은 세지 않음</td></tr>
+                      <tr><td><code>enemy_recapture_events</code></td><td>적이 아군 점령 거점을 다시 빼앗은 횟수</td></tr>
+                      <tr><td><code>hero_actions / hero_damage_dealt</code></td><td>클리프 공격 횟수 / 실제로 깎은 적 HP 합계. 개입 효과를 확인할 때 사용</td></tr>
+                      <tr><td><code>ally_artillery_shots / ally_artillery_damage_dealt</code></td><td>아군 포격 횟수 / 실제로 깎은 적 HP 합계. 포격 효율 비교용</td></tr>
+                      <tr><td><code>enemy_artillery_damage_dealt</code></td><td>적 포격으로 아군 병력·거점이 실제로 잃은 HP 합계. 본진 직접 피해와 구분</td></tr>
+                      <tr><td><code>rest_hp_recovered_total</code></td><td>안전 지역 자동 회복으로 실제 되찾은 HP. 0이면 회복이 일어나지 않음</td></tr>
+                      <tr><td><code>source</code></td><td><code>ui_controls</code>는 화면 버튼 실행, <code>automated_policy</code>는 테스트 정책 실행. 전자는 사람이 플레이했다는 증거가 아님</td></tr>
+                    </tbody>
+                  </table>
+                  <p class="csv-example-note"><b>주요 전황</b> · <code>turn</code>은 발생 턴, <code>major_events</code>는 점령·재탈환·측면 침투·본진 피해 등 사건의 종류입니다. <code>base_damage_turn</code>은 해당 턴에 본진이 받은 피해입니다. 일상적인 이동과 작은 HP 변화는 제외합니다.</p>
+                  <p><b>핵심 설정</b> · <code>parameter</code>는 수치 이름, <code>value</code>는 적용 값, <code>min/max</code>는 허용 범위입니다. <code>ally_attack</code>은 아군 공격력, <code>raider_attack</code>은 제2·3전장의 침투병 공격력, <code>enemyPeriod / enemyChallengePeriod</code>는 각 난이도의 적 증원 주기입니다.</p>
+                  <div class="csv-tip"><b>실험 비교</b> · <b>전략 비교</b>: 전장·난이도·설정 ID(<code>balance_config_id</code>)를 같게 두고 지휘 방식만 바꿉니다. <b>수치 변경 비교</b>: 전장·난이도·지휘 방식을 같게 두고 설정 ID가 다른 결과를 비교합니다. 이때 각 실험의 설정 CSV도 함께 보관하세요.</div>
+                  <div class="csv-tip"><b>설정 변경</b> · 현재 선택한 전장·난이도로 <b>핵심 설정</b>을 내려받아 <code>value</code>만 수정하세요. 행을 삭제하거나 열 이름을 바꾸면 불러오지 못할 수 있습니다. 지휘 부대·클리프 HP 100은 고정입니다. 새로고침하면 누적 기록이 사라지므로 먼저 내보내세요.</div>
+                  <div class="csv-tip"><b>출처</b> · <code>session_id</code>는 판마다 다른 식별자, <code>engine_version</code>은 게임 버전입니다. 모든 수치는 자체 시뮬레이터에서 나온 값으로, 실제 게임 이용자 통계가 아닙니다.</div>
+                </div>
+              </details>
+              <div class="csv-title settings-import-title">설정 불러오기 <small>지휘 부대·클리프 HP 100</small></div>
+              <label for="balanceImport" style="font-size:11px;color:#c0e8dc">설정 CSV 선택 · value 열 수정 · 적용 시 전투 재시작</label>
+              <input accept=".csv,text/csv" aria-label="편집한 밸런스 설정 CSV 선택" class="balance-file" id="balanceImport" type="file"/>
+              <div aria-live="polite" class="balance-status" id="balanceImportStatus" role="status">설정 CSV의 <b>value</b> 열만 수정하세요. 실험별 설정 ID는 결과 CSV에 기록됩니다.</div>
+              <p class="balance-note"><span class="balance-warning">새로고침하면 기록이 사라집니다. 종료 후 CSV를 저장하세요.</span></p>
+            </div>
+          </details>
+          <div class="endcard" id="result" role="status"></div>
+          <h2 class="log-heading">전황 기록 <small>최신 순</small></h2>
+          <div aria-label="턴별 전황 기록" aria-live="off" class="log" id="log" role="log"></div>
+        </section>
+      </div>
+      <details class="rules-details">
+        <summary>전술 규칙</summary>
+        <div class="rules-grid">
+          <div><b>부대 명령</b>진격: 경로상의 적과 교전하며 이동 · 우선이동: 공격하지 않고 이동을 우선하지만 공격받을 수 있음</div>
+          <div><b>거점 효과</b>일반 거점: 병력 생산 · 요새 거점: 점령 세력 공격력 강화 · 병기 거점: 적 거점 포격 지원</div>
+          <div><b>전선·재출격</b>직전 전선 거점 1곳을 점령해야 다음 전선으로 진입할 수 있습니다. 제3전선 전체 확보 후 적 본진 공략 가능. 전멸한 부대는 3턴 후 재출격합니다.</div>
+          <div><b>자동 회복·기록</b>안전한 아군 지역에서 2턴 대기 후 자동 회복. CSV는 핵심 성과·주요 전황·핵심 설정 3종을 제공합니다.</div>
+        </div>
+      </details>
+      <p class="disclaimer">기획서 기반 비공식 게임 시스템 검증용 프로토타입입니다. 전투 수치와 CSV는 자체 시뮬레이션 결과이며, 실제 붉은사막 플레이어 데이터가 아닙니다.</p>
+      <div aria-hidden="true" id="tutorialBackdrop"></div>
+      <aside aria-describedby="tutorialLead" aria-labelledby="tutorialTitle" aria-modal="true" id="tutorialCard" role="dialog">
+        <div class="tutorial-head">
+          <div>
+            <span class="tutorial-eyebrow">조작 가이드</span>
+            <h2 id="tutorialTitle">사용 방법</h2>
+          </div>
+          <button aria-label="사용 방법 닫기" class="tutorial-close" id="tutorialClose" type="button">×</button>
+        </div>
+        <p id="tutorialLead">항목을 선택하면 실제 화면에서 조작을 진행합니다. 실습 중 명령은 전투에 반영됩니다.</p>
+        <div class="lesson-menu" id="lessonMenu">
+<button class="lesson-card" data-lesson="basic" type="button"><span class="lesson-number">01</span><strong>부대 지휘</strong><span>경로 지정 · 진격</span></button>
+<button class="lesson-card" data-lesson="cliff" type="button"><span class="lesson-number">02</span><strong>클리프</strong><span>이동 · 직접 공격</span></button>
+<button class="lesson-card" data-lesson="rush" type="button"><span class="lesson-number">03</span><strong>우선이동</strong><span>교전 없이 이동</span></button>
+<button class="lesson-card" data-lesson="rules" type="button"><span class="lesson-number">04</span><strong>전장 규칙</strong><span>거점 · 회복 · CSV</span></button>
+</div>
+        <div class="lesson-info" hidden="" id="lessonInfo">
+          <div class="lesson-info-top"><button id="lessonBack" type="button">← 목록</button><span id="lessonInfoTag">안내</span></div>
+          <h3 id="lessonInfoTitle"></h3>
+          <p id="lessonInfoText"></p>
+          <div id="lessonInfoBody"></div>
+          <button class="lesson-launch" id="lessonLaunch" type="button">실습 시작</button>
+        </div>
+        <div class="tutorial-actions"><button id="tutorialSkip" type="button">바로 플레이</button></div>
+        <p class="tutorial-reopen-note">게임 중에도 <b>사용 방법</b>에서 다시 볼 수 있습니다.</p>
+      </aside>
+      <aside aria-label="조작 실습 안내" aria-live="polite" hidden="" id="practiceCoach" role="region">
+        <div class="practice-top"><span id="practiceCount">1 / 5</span><span class="practice-subtitle">조작 실습</span></div>
+        <div aria-hidden="true" class="practice-step-track" id="practiceTrack"></div>
+        <strong id="practiceTitle">기본 지휘</strong>
+        <p id="practiceDetail">노란색 표시 항목 선택</p>
+        <p aria-live="polite" class="practice-hint" id="practiceHint"></p>
+        <div class="practice-buttons"><button id="practiceFind" type="button">대상 위치</button><button hidden="" id="practiceNext" type="button">다음 항목</button><button id="practiceExit" type="button">실습 종료</button></div>
+      </aside>
+    </main>
+  </body>
+</html>
